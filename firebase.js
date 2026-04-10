@@ -5,22 +5,24 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification,
+  sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
   getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  addDoc,
-  collection
+  collection,
+  addDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "...",
-  projectId: "..."
+  apiKey: "AIzaSyAu8BaL9NV6NU_oKSy-pxh89TuVrovZzaE",
+  authDomain: "ai-saas-business-ecfab.firebaseapp.com",
+  projectId: "ai-saas-business-ecfab",
+  storageBucket: "ai-saas-business-ecfab.appspot.com",
+  messagingSenderId: "568523173235",
+  appId: "1:568523173235:web:b714d052976268f1e72906"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -35,9 +37,8 @@ export {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  doc,
-  setDoc,
-  getDoc,
-  addDoc,
-  collection
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  collection,
+  addDoc
 };
