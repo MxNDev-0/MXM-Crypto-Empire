@@ -7,13 +7,14 @@
 
 <style>
 body {
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   text-align: center;
   background: #0b132b;
   color: white;
   padding: 20px;
 }
 
+/* AUTH INPUTS */
 input, button {
   padding: 10px;
   margin: 5px;
@@ -25,13 +26,16 @@ button { cursor: pointer; }
 
 #dashboard { display:none; margin-top:20px; }
 
+/* MAIN CARDS */
 .card {
-  margin-top: 15px;
-  padding: 15px;
+  margin: 15px auto;
+  padding: 18px;
   background: #1c2541;
-  border-radius: 10px;
+  border-radius: 12px;
+  max-width: 500px;
 }
 
+/* BUTTON */
 .pay-btn {
   background: green;
   color: white;
@@ -42,7 +46,7 @@ button { cursor: pointer; }
   margin-top: 10px;
 }
 
-/* MODAL */
+/* MODAL BACKDROP */
 .modal {
   display:none;
   position:fixed;
@@ -50,18 +54,40 @@ button { cursor: pointer; }
   left:0;
   width:100%;
   height:100%;
-  background:rgba(0,0,0,0.7);
+  background:rgba(0,0,0,0.75);
+  padding: 20px;
 }
 
+/* MODAL BOX (SCROLLABLE + CENTERED) */
 .modal-content {
   background:#1c2541;
-  padding:20px;
-  width:85%;
-  max-width:420px;
-  margin:100px auto;
-  border-radius:10px;
-  max-height:80vh;
+  padding:25px;
+  width:90%;
+  max-width:450px;
+  margin: 40px auto;
+  border-radius:12px;
+
+  /* IMPORTANT FOR SCROLL */
+  max-height:85vh;
   overflow-y:auto;
+
+  /* nicer look */
+  text-align:left;
+  line-height:1.5;
+}
+
+/* SCROLLBAR (RIGHT SIDE VISIBLE STYLE) */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #00c853;
+  border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #0b132b;
 }
 </style>
 </head>
@@ -90,15 +116,15 @@ button { cursor: pointer; }
 <div class="card">
 <h3>Crypto Exchange</h3>
 
-<button class="pay-btn" onclick="openExchangeInfo()">
+<button class="pay-btn" onclick="openExchange()">
 Open FixedFloat Exchange
 </button>
 </div>
 
 <!-- PROOF -->
 <div class="card">
-<h3>Trading Proof (Locked)</h3>
-<img src="https://via.placeholder.com/300x150" style="filter:blur(6px);" width="100%">
+<h3>Trading Proof (Premium Locked)</h3>
+<img src="https://via.placeholder.com/400x180" style="filter:blur(6px);width:100%;border-radius:10px;">
 </div>
 
 <!-- PREMIUM -->
@@ -107,7 +133,7 @@ Open FixedFloat Exchange
 
 <p><b>Price:</b> $15.66</p>
 
-<button class="pay-btn" onclick="openPremiumModal()">
+<button class="pay-btn" onclick="openPremium()">
 Upgrade Now
 </button>
 </div>
@@ -118,24 +144,26 @@ Upgrade Now
 <div class="modal" id="exchangeModal">
 <div class="modal-content">
 
-<h3>💱 FixedFloat Exchange</h3>
+<h2>💱 FixedFloat Exchange</h2>
 
 <p>
-FixedFloat is a non-custodial crypto exchange where users can swap crypto instantly without storing funds on the platform.
+FixedFloat is a non-custodial instant cryptocurrency exchange platform that allows users to swap digital assets without holding funds on the platform.
 </p>
 
+<h3>📌 Key Features</h3>
 <ul>
-<li>✔ Instant swaps</li>
-<li>✔ Optional account for tracking</li>
-<li>✔ Multiple assets supported</li>
+<li>✔ Instant crypto swaps</li>
+<li>✔ No mandatory registration (optional tracking only)</li>
+<li>✔ Supports multiple cryptocurrencies</li>
 <li>✔ Automated exchange system</li>
 </ul>
 
-<p style="color:red;">
-⚠ Always verify wallet addresses before sending crypto
+<h3>⚠ Important Notice</h3>
+<p>
+Always verify wallet addresses before sending crypto. Transactions are irreversible once confirmed on the blockchain.
 </p>
 
-<button class="pay-btn" onclick="continueToExchange()">
+<button class="pay-btn" onclick="goExchange()">
 Continue → Open Exchange
 </button>
 
@@ -146,26 +174,31 @@ Continue → Open Exchange
 <div class="modal" id="premiumModal">
 <div class="modal-content">
 
-<h3>💳 Premium Checkout</h3>
+<h2>💳 Premium Upgrade</h2>
 
 <p><b>Price:</b> $15.66</p>
 
 <p>
-Your payment will be processed by NOWPayments.
-The final crypto amount (USDT/TRX) will be calculated automatically based on live rates and network fees.
+Your payment will be processed securely via NOWPayments. The final crypto amount (USDT/TRX) is automatically calculated based on real-time exchange rates and network fees.
 </p>
+
+<h3>🔥 What you will get after upgrade</h3>
 
 <ul>
-<li>✔ AI tools</li>
-<li>✔ Trading insights</li>
-<li>✔ Premium content unlock</li>
+<li>✔ Access to advanced AI tools</li>
+<li>✔ Exclusive crypto trading insights</li>
+<li>✔ Full trading breakdown & strategies</li>
+<li>✔ Premium locked content access</li>
+<li>✔ Future updates & new features first</li>
 </ul>
 
-<p style="color:red;">
-⚠ Payments are non-refundable once confirmed
-</p>
+<h3>⚠ Important Notice</h3>
+<ul>
+<li>✔ Payments are irreversible after confirmation</li>
+<li>✔ Ensure wallet address is correct before sending funds</li>
+</ul>
 
-<button class="pay-btn" onclick="goToPayment()">
+<button class="pay-btn" onclick="payNow()">
 Continue to Payment
 </button>
 
@@ -189,17 +222,17 @@ function signup(){
 }
 
 /* EXCHANGE */
-function openExchangeInfo(){
+function openExchange(){
   document.getElementById("exchangeModal").style.display="block";
 }
 
-function continueToExchange(){
-  document.getElementById("exchangeModal").style.display="none";
+function goExchange(){
   window.open("https://ff.io/?ref=s1nep47a","_blank");
+  document.getElementById("exchangeModal").style.display="none";
 }
 
 /* PREMIUM */
-function openPremiumModal(){
+function openPremium(){
   document.getElementById("premiumModal").style.display="block";
 }
 
@@ -208,7 +241,7 @@ function closePremium(){
 }
 
 /* PAYMENT */
-function goToPayment(){
+function payNow(){
   window.open("https://nowpayments.io/payment/?iid=5153003613","_blank");
 }
 </script>
