@@ -6,146 +6,117 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{font-family:Arial;background:#0b132b;color:white;margin:0}
-
-/* NAV */
-nav{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  padding:10px;
-  background:#111a33;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b132b;
+  color:white;
 }
-nav button{
+
+/* HEADER */
+.hero{
+  max-width:520px;
+  margin:25px auto;
+  padding:25px;
+  background:#1c2541;
+  border-radius:14px;
+  text-align:center;
+  position:relative;
+}
+
+.beta{
+  position:absolute;
+  top:10px;
+  right:10px;
   background:gold;
-  border:none;
-  padding:8px;
+  color:black;
+  padding:4px 8px;
   border-radius:6px;
 }
 
-/* SECTIONS */
-.section{display:none;padding:20px}
-.active{display:block}
+.logo{
+  width:70px;
+  height:70px;
+  margin:auto;
+  background:gold;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:black;
+  font-weight:bold;
+}
 
-/* HERO */
-.hero{text-align:center;padding:30px}
+/* TITLE */
+.hero h1{
+  font-size:26px;
+  background:linear-gradient(to right,red,orange,yellow,green,blue,indigo,violet);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+/* BUTTONS */
+button{
+  background:gold;
+  color:black;
+  padding:10px;
+  margin:5px;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
+}
 
 /* DASHBOARD */
+#dashboard{
+  display:none;
+  max-width:520px;
+  margin:auto;
+}
+
 .card{
   background:#1c2541;
   padding:15px;
-  margin:10px auto;
-  max-width:500px;
+  margin:10px 0;
   border-radius:10px;
 }
-
-/* MODAL */
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.8);
-}
-.modal-content{
-  background:#1c2541;
-  margin:10% auto;
-  padding:20px;
-  max-width:400px;
-  border-radius:10px;
-}
-input,textarea{
-  width:90%;
-  padding:10px;
-  margin:5px;
-}
-button{cursor:pointer}
 </style>
 </head>
 
 <body>
 
-<!-- NAV -->
-<nav>
-<button onclick="showPage('home')">Home</button>
-<button onclick="showPage('about')">About</button>
-<button onclick="showPage('faq')">FAQ</button>
-<button onclick="showPage('support')">Support</button>
-<button onclick="showPage('settings')">Settings</button>
-</nav>
-
-<!-- HOME -->
-<div id="home" class="section active">
 <div class="hero">
-<h1>MXM Crypto Empire</h1>
-<p>Trusted crypto earning & exchange guide platform</p>
+  <div class="beta">BETA</div>
+  <div class="logo">MXM</div>
+  <h1>MXM Crypto Empire</h1>
 
-<button onclick="openAuth('login')">Login</button>
-<button onclick="openAuth('register')">Register</button>
-</div>
-
-<p>🟢 Users Online: <span id="onlineCount">0</span></p>
-</div>
-
-<!-- ABOUT -->
-<div id="about" class="section">
-<h2>About</h2>
-<p>This platform provides verified crypto earning tools, exchange guides, and platform reviews.</p>
-<p><b>Disclaimer:</b> We do not own external platforms. No financial advice is given.</p>
-</div>
-
-<!-- FAQ -->
-<div id="faq" class="section">
-<h2>FAQ</h2>
-<p>Q: Is this financial advice?<br>A: No.</p>
-</div>
-
-<!-- SUPPORT -->
-<div id="support" class="section">
-<h2>Support</h2>
-<textarea id="msg"></textarea>
-<button onclick="sendMsg()">Send</button>
-</div>
-
-<!-- SETTINGS -->
-<div id="settings" class="section">
-<h2>Settings</h2>
-<input id="newName" placeholder="Change username">
-<button onclick="changeName()">Update</button>
-<br><br>
-<button onclick="resetPass()">Reset Password</button>
+  <button onclick="register()">Register</button>
+  <button onclick="login()">Login</button>
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="section">
+<div id="dashboard">
 
 <div class="card">
 <h3>Free Earning Platform</h3>
-<button onclick="openPlatform('earn')">View</button>
+<button onclick="trackClick('forfans')">Open</button>
 </div>
 
 <div class="card">
 <h3>FixedFloat Exchange</h3>
-<button onclick="openPlatform('float')">View</button>
+<button onclick="trackClick('fixedfloat')">Open</button>
 </div>
 
 <div class="card">
-<h3>Portfolio Proof</h3>
-<button onclick="openPortfolio()">View Gallery</button>
+<h3>Settings</h3>
+<button onclick="alert('Settings coming next phase')">Open</button>
 </div>
 
-<button onclick="logout()">Logout</button>
-</div>
+<button onclick="logout()" style="background:red;color:white;">Logout</button>
 
-<!-- MODAL -->
-<div class="modal" id="modal">
-<div class="modal-content">
-<p id="modalText"></p>
-<button onclick="confirmGo()">Continue</button>
-<button onclick="closeModal()">Cancel</button>
-</div>
 </div>
 
 <script type="module" src="app.js"></script>
 
 </body>
-  </html>
+</html>
