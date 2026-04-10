@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>AI SaaS Business</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       text-align: center;
       background: #0b132b;
       color: white;
@@ -36,12 +38,13 @@
     }
 
     .pay-btn {
+      display: inline-block;
       background: green;
       color: white;
-      padding: 12px;
-      border-radius: 5px;
-      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 6px;
       text-decoration: none;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -51,7 +54,7 @@
 <h1>🚀 AI SaaS Business</h1>
 <p>Welcome to your AI-powered crypto platform.</p>
 
-<!-- 🔐 AUTH -->
+<!-- 🔐 AUTH SECTION -->
 <div id="auth">
   <h2>Login / Signup</h2>
 
@@ -64,6 +67,7 @@
 
 <!-- 📊 DASHBOARD -->
 <div id="dashboard">
+
   <h2>Dashboard</h2>
   <p>You are logged in 👋</p>
 
@@ -72,153 +76,39 @@
     FixedFloat Exchange
   </a>
 
-  <!-- 💳 ONLY ONE PREMIUM -->
+  <!-- 💳 PREMIUM SECTION -->
   <div class="premium" id="premiumBox">
-    <h3>Upgrade to Premium</h3>
-    <p>Unlock premium tools and features.</p>
+    <h3>💳 Upgrade to Premium</h3>
+    <p>Unlock premium tools, AI features, and advanced crypto insights.</p>
 
-    <a href="https://nowpayments.io/payment/?iid=5153003613" target="_blank" class="pay-btn">
-      Pay with Crypto (USDT BSC)
+    <a href="https://nowpayments.io/payment/?iid=5153003613"
+       target="_blank"
+       class="pay-btn">
+      🚀 Pay with Crypto (USDT BSC)
     </a>
   </div>
+
 </div>
 
+<!-- 🔥 SCRIPTS -->
 <script>
-function signup() {
-  // your Firebase signup here
-  showDashboard();
-}
-
-function login() {
-  // your Firebase login here
-  showDashboard();
-}
-
 function showDashboard() {
   document.getElementById("auth").style.display = "none";
   document.getElementById("dashboard").style.display = "block";
 }
+
+function login() {
+  // Firebase login goes here
+  showDashboard();
+}
+
+function signup() {
+  // Firebase signup goes here
+  showDashboard();
+}
 </script>
 
-</body>
-</html>  <div id="premiumBox">
-    <h3>💳 Upgrade to Premium</h3>
-    <p>Unlock premium tools, AI features, and advanced crypto insights.</p>
-
-    <a href="https://nowpayments.io/payment/?iid=5153003613" target="_blank">
-      <button style="background: green; color: white;">
-        🚀 Pay with Crypto (USDT BSC)
-      </button>
-    </a>
-  </div>
-
-</section>
-
-<script>
-  function showDashboard() {
-    document.getElementById("authSection").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-  }
-
-  function login() {
-    // connect your Firebase login here
-    showDashboard();
-  }
-
-  function signup() {
-    // connect your Firebase signup here
-    showDashboard();
-  }
-
-  function hidePremium() {
-    document.getElementById("premiumBox").style.display = "none";
-  }
-</script>
-
-</body>
-</html>  <div id="premiumBox">
-    <h3>💳 Upgrade to Premium</h3>
-    <p>Unlock premium tools, AI features, and advanced crypto insights.</p>
-
-    <a href="https://nowpayments.io/payment/?iid=5153003613" target="_blank">
-      <button style="background: green; color: white;">
-        🚀 Pay with Crypto (USDT BSC)
-      </button>
-    </a>
-  </div>
-
-</section>
-
-<script>
-  function showDashboard() {
-    document.getElementById("authSection").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-  }
-
-  function login() {
-    // connect your Firebase login here
-    showDashboard();
-  }
-
-  function signup() {
-    // connect your Firebase signup here
-    showDashboard();
-  }
-
-  function hidePremium() {
-    document.getElementById("premiumBox").style.display = "none";
-  }
-</script>
-
-</body>
-</html>
-</section>
-
-<!-- SCRIPTS -->
-<script type="module" src="firebase.js"></script>
-<script src="app.js"></script>
-
-</body>
-</html>  <h3>💳 Upgrade to Premium</h3>
-
-  <p>Unlock premium tools, AI features, and advanced crypto insights.</p>
-
-  <a href="https://nowpayments.io/payment/?iid=5153003613"
-     target="_blank"
-     style="display:inline-block;padding:12px 20px;background:#00c853;color:white;border-radius:8px;text-decoration:none;">
-    🚀 Pay with Crypto (USDT BSC)
-  </a>
-
-  <!-- 🔥 PREMIUM SECTION -->
-  <div id="premium" style="display:none;">
-    <h3>🔥 Premium Dashboard</h3>
-
-    <p>Welcome Premium User 🎉</p>
-
-    <ul>
-      <li>Advanced crypto tools</li>
-      <li>AI insights (coming soon)</li>
-      <li>Priority updates</li>
-    </ul>
-  </div>
-
-</section>
-
-<!-- SCRIPTS -->
-<script type="module" src="firebase.js"></script>
-<script src="app.js"></script>
-
-</body>
-</html>  <h3>💳 Upgrade to Premium</h3>
-  <p>Unlock AI tools + extra features</p>
-
-  <a href="https://nowpayments.io/payment/?iid=5153003613">
-    💳 Pay with Crypto
-  </a>
-</section>
-
----
-
+<!-- Firebase / App Scripts -->
 <script type="module" src="firebase.js"></script>
 <script src="app.js"></script>
 
