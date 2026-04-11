@@ -87,3 +87,22 @@ button {
 .post a {
   color: #5bc0be;
 }
+.premium-badge {
+  background: gold;
+  color: black;
+  padding: 2px 6px;
+  font-size: 10px;
+  border-radius: 5px;
+  margin-left: 5px;
+  font-weight: bold;
+}
+
+.locked {
+  filter: blur(4px);
+  user-select: none;
+}
+
+.unlock-btn {
+  background: orange;
+  margin-top: 5px;
+}
