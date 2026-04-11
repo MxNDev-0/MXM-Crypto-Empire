@@ -14,183 +14,154 @@ import {
   arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// ==========================
-// CONFIG
-// ==========================
 const ADMIN_EMAIL = "nc.maxiboro@gmail.com";
 
-// ==========================
 // ELEMENTS
-// ==========================
 const postsDiv = document.getElementById("posts");
-const adminPanel = document.getElementById("adminPanel");
 
-// ==========================
-// AUTH CHECK
-// ==========================
+const totalPostsEl = document.getElementById("totalPosts");
+const totalClicksEl = document.getElementById("totalClicks");
+const totalLikesEl = document.getElementById("totalLikes");
+const topPostEl = document.getElementById("topPost");
+
+// AUTH
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
   } else {
     loadPosts();
 
-    // SHOW ADMIN PANEL
     if (user.email === ADMIN_EMAIL) {
-      adminPanel.style.display = "block";
+      document.getElementById("adminPanel").style.display = "block";
     }
   }
 });
 
-// ==========================
+// NAVIGATION
+window.goHome = function () {
+  window.location.reload();
+};
+
+window.goProfile = function () {
+  alert("Profile page coming soon 👀");
+};
+
 // LOGOUT
-// ==========================
 window.logout = function () {
   signOut(auth);
 };
 
-// ==========================
 // CREATE POST
-// ==========================
 window.createPost = async function () {
   const text = document.getElementById("postText").value.trim();
   const link = document.getElementById("postLink").value.trim();
 
-  if (!text || !link) {
-    alert("Fill all fields");
-    return;
-  }
+  if (!text || !link) return alert("Fill all fields");
 
-  try {
-    await addDoc(collection(db, "posts"), {
-      text: text,
-      link: link,
-      user: auth.currentUser.email,
-      clicks: 0,
-      likes: 0,
-      comments: [],
-      createdAt: new Date()
-    });
+  await addDoc(collection(db, "posts"), {
+    text,
+    link,
+    user: auth.currentUser.email,
+    clicks: 0,
+    likes: 0,
+    comments: [],
+    createdAt: new Date()
+  });
 
-    // CLEAR INPUT
-    document.getElementById("postText").value = "";
-    document.getElementById("postLink").value = "";
+  document.getElementById("postText").value = "";
+  document.getElementById("postLink").value = "";
 
-    loadPosts();
-  } catch (err) {
-    console.error(err);
-    alert("Error creating post");
-  }
+  loadPosts();
 };
 
-// ==========================
-// LOAD POSTS
-// ==========================
+// LOAD POSTS + ANALYTICS
 async function loadPosts() {
-  postsDiv.innerHTML = "<p>Loading...</p>";
+  postsDiv.innerHTML = "Loading...";
 
-  try {
-    const snapshot = await getDocs(collection(db, "posts"));
+  let totalPosts = 0;
+  let totalClicks = 0;
+  let totalLikes = 0;
 
-    postsDiv.innerHTML = "";
+  let topPost = { clicks: 0, text: "None" };
 
-    snapshot.forEach((docSnap) => {
-      const post = docSnap.data();
-      const id = docSnap.id;
+  const snapshot = await getDocs(collection(db, "posts"));
 
-      let commentsHTML = "";
+  postsDiv.innerHTML = "";
 
-      if (post.comments && post.comments.length > 0) {
-        post.comments.forEach((c) => {
-          commentsHTML += `
-            <p><b>${c.user}:</b> ${c.text}</p>
-          `;
-        });
-      }
+  snapshot.forEach((docSnap) => {
+    const post = docSnap.data();
+    const id = docSnap.id;
 
-      postsDiv.innerHTML += `
-        <div class="post">
-          <h4>${post.user}</h4>
-          <p>${post.text}</p>
+    totalPosts++;
+    totalClicks += post.clicks || 0;
+    totalLikes += post.likes || 0;
 
-          <a href="${post.link}" target="_blank" onclick="trackClick('${id}')">
-            Visit Link
-          </a>
+    if ((post.clicks || 0) > topPost.clicks) {
+      topPost = { clicks: post.clicks || 0, text: post.text };
+    }
 
-          <p>Clicks: ${post.clicks || 0}</p>
-          <p>Likes: ${post.likes || 0}</p>
-
-          <button onclick="likePost('${id}')">Like ❤️</button>
-
-          <div style="margin-top:10px;">
-            <input id="comment-${id}" placeholder="Write a comment">
-            <button onclick="addComment('${id}')">Comment</button>
-          </div>
-
-          <div style="margin-top:10px;">
-            ${commentsHTML}
-          </div>
-        </div>
-      `;
+    let commentsHTML = "";
+    post.comments.forEach(c => {
+      commentsHTML += `<p><b>${c.user}:</b> ${c.text}</p>`;
     });
 
-  } catch (err) {
-    console.error(err);
-    postsDiv.innerHTML = "<p>Error loading posts</p>";
-  }
+    postsDiv.innerHTML += `
+      <div class="post">
+        <h4>${post.user}</h4>
+        <p>${post.text}</p>
+
+        <a href="${post.link}" target="_blank" onclick="trackClick('${id}')">
+          Visit Link
+        </a>
+
+        <p>Clicks: ${post.clicks}</p>
+        <p>Likes: ${post.likes}</p>
+
+        <button onclick="likePost('${id}')">Like ❤️</button>
+
+        <input id="comment-${id}" placeholder="Comment">
+        <button onclick="addComment('${id}')">Send</button>
+
+        ${commentsHTML}
+      </div>
+    `;
+  });
+
+  totalPostsEl.innerText = totalPosts;
+  totalClicksEl.innerText = totalClicks;
+  totalLikesEl.innerText = totalLikes;
+  topPostEl.innerText = topPost.text;
 }
 
-// ==========================
-// TRACK CLICKS 💰
-// ==========================
+// CLICK TRACK
 window.trackClick = async function (id) {
-  try {
-    const ref = doc(db, "posts", id);
-    await updateDoc(ref, {
-      clicks: increment(1)
-    });
-  } catch (err) {
-    console.error(err);
-  }
+  const ref = doc(db, "posts", id);
+  await updateDoc(ref, { clicks: increment(1) });
 };
 
-// ==========================
-// LIKE POST ❤️
-// ==========================
+// LIKE
 window.likePost = async function (id) {
-  try {
-    const ref = doc(db, "posts", id);
-    await updateDoc(ref, {
-      likes: increment(1)
-    });
-
-    loadPosts();
-  } catch (err) {
-    console.error(err);
-  }
+  const ref = doc(db, "posts", id);
+  await updateDoc(ref, { likes: increment(1) });
+  loadPosts();
 };
 
-// ==========================
-// ADD COMMENT 💬
-// ==========================
+// COMMENT
 window.addComment = async function (id) {
   const input = document.getElementById(`comment-${id}`);
   const text = input.value.trim();
 
   if (!text) return;
 
-  try {
-    const ref = doc(db, "posts", id);
+  const ref = doc(db, "posts", id);
 
-    await updateDoc(ref, {
-      comments: arrayUnion({
-        user: auth.currentUser.email,
-        text: text
-      })
-    });
+  await updateDoc(ref, {
+    comments: arrayUnion({
+      user: auth.currentUser.email,
+      text
+    })
+  });
 
-    input.value = "";
-    loadPosts();
-  } catch (err) {
-    console.error(err);
-  }
+  input.value = "";
+  loadPosts();
 };
