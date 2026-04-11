@@ -1,4 +1,3 @@
-// firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getAuth,
@@ -22,8 +21,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// 🔥 THIS FIXES REFRESH LOGOUT ISSUE
-await setPersistence(auth, browserLocalPersistence);
+// 🔥 FIX: stay logged in after refresh
+setPersistence(auth, browserLocalPersistence);
 
 export {
   auth,
