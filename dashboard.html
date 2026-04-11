@@ -8,7 +8,7 @@
 
 <!-- NAVBAR -->
 <div class="navbar">
-  <h2 class="logo">MXM Crypto Empire <span class="beta">BETA</span></h2>
+  <h2>MXM Crypto Empire <span class="beta">BETA</span></h2>
 
   <div class="nav-links">
     <button onclick="goHome()">Home</button>
@@ -17,32 +17,30 @@
   </div>
 </div>
 
-<!-- MAIN -->
 <div class="container">
 
   <!-- ANALYTICS -->
   <div class="analytics">
-    <h3>📊 Analytics Dashboard</h3>
+    <h3>📊 Analytics</h3>
     <p>Total Posts: <span id="totalPosts">0</span></p>
     <p>Total Clicks: <span id="totalClicks">0</span></p>
     <p>Total Likes: <span id="totalLikes">0</span></p>
     <p>Top Post: <span id="topPost">None</span></p>
   </div>
 
-  <!-- ADMIN -->
-  <div id="adminPanel" style="display:none;">
-    <h3>Admin Panel 👑</h3>
-    <p>You are the admin</p>
-  </div>
-
   <!-- POST BOX -->
   <div class="post-box">
-    <textarea id="postText" placeholder="What's on your mind?"></textarea>
-    <input type="text" id="postLink" placeholder="Paste your link">
-    <button onclick="createPost()">Post</button>
+    <textarea id="postText" placeholder="Write post..."></textarea>
+    <input id="postLink" placeholder="Link">
+
+    <label>
+      <input type="checkbox" id="isPremium">
+      Mark as Premium 💎
+    </label>
+
+    <button onclick="createPost()">Create Post</button>
   </div>
 
-  <!-- POSTS -->
   <div id="posts"></div>
 
 </div>
