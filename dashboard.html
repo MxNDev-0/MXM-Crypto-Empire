@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
-<link rel="stylesheet" href="style.css">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<header>
-  <h3>MXM Dashboard</h3>
-  <button onclick="logout()">Logout</button>
-</header>
+<h2>Welcome to MXM Dashboard</h2>
 
-<div>
-  <h2>Welcome 👋</h2>
+<button onclick="logout()">Logout</button>
 
-  <button onclick="window.open('https://ff.io/?ref=s1nep47a')">
-    FixedFloat
-  </button>
+<div class="post-box">
+  <textarea id="postText" placeholder="Write something..."></textarea>
+  <input type="text" id="postLink" placeholder="Paste your link here">
+  <button onclick="createPost()">Post</button>
 </div>
+
+<h3>All Posts</h3>
+<div id="posts"></div>
 
 <script type="module" src="dashboard.js"></script>
 </body>
