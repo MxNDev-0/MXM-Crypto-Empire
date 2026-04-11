@@ -5,35 +5,48 @@ import {
   onAuthStateChanged
 } from "./firebase.js";
 
-// 🔥 AUTO REDIRECT IF ALREADY LOGGED IN
+// 🔥 auto redirect if already logged in
 onAuthStateChanged(auth, (user) => {
   if (user) {
     window.location.href = "dashboard.html";
   }
 });
 
-// LOGIN
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("pass").value;
+window.addEventListener("DOMContentLoaded", () => {
 
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-    window.location.href = "dashboard.html";
-  } catch (e) {
-    alert(e.message);
-  }
-});
+  const loginBtn = document.getElementById("loginBtn");
+  const signupBtn = document.getElementById("signupBtn");
 
-// SIGNUP
-document.getElementById("signupBtn").addEventListener("click", async () => {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("pass").value;
+  // LOGIN
+  loginBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("pass").value;
 
-  try {
-    await createUserWithEmailAndPassword(auth, email, pass);
-    alert("Account created. Now login.");
-  } catch (e) {
-    alert(e.message);
-  }
+    if (!email || !pass) {
+      alert("Fill all fields");
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      alert("Login successful");
+      window.location.href = "dashboard.html";
+    } catch (e) {
+      alert("Login failed: " + e.message);
+    }
+  });
+
+  // SIGNUP
+  signupBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("pass").value;
+
+    try {
+      await createUserWithEmailAndPassword(auth, email, pass);
+      alert("Account created! Now login.");
+    } catch (e) {
+      alert(e.message);
+    }
+  });
+
 });
