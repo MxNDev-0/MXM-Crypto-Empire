@@ -6,30 +6,37 @@
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <h1>MXM Crypto Empire <span class="beta">BETA</span></h1>
+<!-- NAVBAR -->
+<div class="navbar">
+  <h2 class="logo">MXM Crypto Empire <span class="beta">BETA</span></h2>
+
+  <div class="nav-links">
+    <span>Home</span>
+    <span>Profile</span>
+    <button onclick="logout()">Logout</button>
+  </div>
 </div>
 
-<h2>Dashboard</h2>
+<!-- MAIN CONTENT -->
+<div class="container">
 
-<button onclick="logout()">Logout</button>
+  <!-- POST BOX -->
+  <div class="post-box">
+    <textarea id="postText" placeholder="What's on your mind?"></textarea>
+    <input type="text" id="postLink" placeholder="Paste your link">
+    <button onclick="createPost()">Post</button>
+  </div>
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel" style="display:none;">
-  <h3>Admin Panel 👑</h3>
-  <p>You are the admin</p>
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel" style="display:none;">
+    <h3>Admin Panel 👑</h3>
+    <p>You are the admin</p>
+  </div>
+
+  <!-- FEED -->
+  <div id="posts"></div>
+
 </div>
-
-<!-- POST BOX -->
-<div class="post-box">
-  <textarea id="postText" placeholder="Write something..."></textarea>
-  <input type="text" id="postLink" placeholder="Paste your link">
-  <button onclick="createPost()">Post</button>
-</div>
-
-<h3>Feed</h3>
-<div id="posts"></div>
 
 <script type="module" src="dashboard.js"></script>
 </body>
