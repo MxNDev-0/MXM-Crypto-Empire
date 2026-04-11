@@ -1,31 +1,24 @@
-body {
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
-  text-align: center;
-  padding: 20px;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b132b;
+  color:white;
+  text-align:center;
 }
 
-section {
-  margin: 20px auto;
-  padding: 15px;
-  border: 1px solid #333;
-  width: 80%;
-  border-radius: 10px;
+.box{
+  max-width:300px;
+  margin:100px auto;
 }
 
-input {
-  padding: 10px;
-  margin: 5px;
-  width: 200px;
+input,button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
 }
 
-button {
-  padding: 10px 15px;
-  margin: 5px;
-  cursor: pointer;
-}
-
-#dashboard {
-  display: none;
+button{
+  background:gold;
+  border:none;
+  cursor:pointer;
 }
