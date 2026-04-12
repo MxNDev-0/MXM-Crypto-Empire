@@ -1,4 +1,4 @@
-# MXM Blog Platform
+# MxNDev-0 Blog Platform
 
 A simple monetized blog system built with Firebase.
 
