@@ -20,21 +20,16 @@ const postsDiv = document.getElementById("posts");
 
 let currentUserData = null;
 
-// 🔥 IMPORTANT: ONLY RUN ONCE
-let authLoaded = false;
-
+// 🔥 AUTH CHECK (NO LOOP)
 onAuthStateChanged(auth, async (user) => {
 
-  if (authLoaded) return;
-  authLoaded = true;
-
-  // ⛔ DO NOT redirect instantly
   if (!user) {
+    // ⛔ ONLY redirect once after delay
     setTimeout(() => {
       if (!auth.currentUser) {
         window.location.href = "index.html";
       }
-    }, 500); // give firebase time
+    }, 1000);
     return;
   }
 
@@ -54,7 +49,7 @@ onAuthStateChanged(auth, async (user) => {
   loadPosts();
 });
 
-// LOGOUT FIX
+// LOGOUT
 window.logout = async () => {
   await signOut(auth);
   window.location.href = "index.html";
@@ -119,15 +114,4 @@ async function loadPosts() {
 
     postsDiv.innerHTML += `
       <div class="post">
-        <h4>${post.user}</h4>
-        <p>${post.text}</p>
-
-        ${
-          post.link
-            ? `<a href="${post.link}" target="_blank">Visit 🔗</a>`
-            : ""
-        }
-      </div>
-    `;
-  });
-}
+        <h4>${post.user
