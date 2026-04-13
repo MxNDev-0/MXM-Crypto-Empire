@@ -23,16 +23,13 @@ const chatHeader = document.getElementById("chatHeader");
 let currentChatId = null;
 let currentUser = null;
 
-// AUTH
+// ================= AUTH =================
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
+  if (!user) return;
 
   currentUser = user;
 
-  // mark online
+  // mark user online
   await setDoc(doc(db, "onlineUsers", user.uid), {
     email: user.email,
     online: true
@@ -41,11 +38,17 @@ onAuthStateChanged(auth, async (user) => {
   loadUsers();
 });
 
-// NAV
-window.logout = () => signOut(auth);
-window.goBack = () => window.location.href = "dashboard.html";
+// ================= NAV =================
+window.logout = async () => {
+  await signOut(auth);
+  window.location.replace("index.html");
+};
 
-// LOAD USERS + ONLINE COUNT
+window.goBack = () => {
+  window.location.href = "dashboard.html";
+};
+
+// ================= LOAD USERS =================
 async function loadUsers() {
   const snapshot = await getDocs(collection(db, "onlineUsers"));
 
@@ -66,7 +69,7 @@ async function loadUsers() {
   });
 }
 
-// OPEN CHAT
+// ================= OPEN CHAT =================
 window.openChat = function (userId, email) {
   const myId = currentUser.uid;
 
@@ -77,7 +80,7 @@ window.openChat = function (userId, email) {
   loadMessages();
 };
 
-// SEND MESSAGE (FIXED)
+// ================= SEND MESSAGE =================
 window.sendMessage = async function () {
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
@@ -97,7 +100,7 @@ window.sendMessage = async function () {
   input.value = "";
 };
 
-// LOAD MESSAGES
+// ================= LOAD MESSAGES =================
 function loadMessages() {
   const q = query(
     collection(db, "chats", currentChatId, "messages"),
