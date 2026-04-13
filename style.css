@@ -1,3 +1,4 @@
+/* ================= GLOBAL ================= */
 body {
   font-family: Arial;
   background: #0b132b;
@@ -5,14 +6,14 @@ body {
   margin: 0;
 }
 
-/* NAVBAR */
+/* ================= NAVBAR ================= */
 .navbar {
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   background: #1c2541;
-  padding: 10px;
+  padding: 10px 15px;
+  flex-wrap: wrap;
 }
 
 .logo {
@@ -33,52 +34,36 @@ body {
   cursor: pointer;
 }
 
-/* BETA */
+/* ================= BETA ================= */
 .beta {
   background: red;
   padding: 2px 6px;
   font-size: 10px;
   border-radius: 5px;
+  margin-left: 5px;
 }
 
-/* CONTAINER */
+/* ================= CONTAINER ================= */
 .container {
-  width: 95%;
   max-width: 600px;
-  margin: auto;
-}
-
-/* AUTH (LOGIN FIX) */
-.auth-box {
-  max-width: 400px;
-  margin: 80px auto;
-  padding: 20px;
-  background: #1c2541;
-  border-radius: 10px;
-}
-
-.auth-box input {
-  width: 100%;
+  margin: 20px auto;
   padding: 10px;
-  margin: 8px 0;
-  border-radius: 5px;
-  border: none;
 }
 
-/* ANALYTICS */
+/* ================= ANALYTICS ================= */
 .analytics {
   background: #1c2541;
   padding: 15px;
   border-radius: 10px;
-  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
-/* POST BOX */
+/* ================= POST BOX ================= */
 .post-box {
   background: #1c2541;
   padding: 15px;
   border-radius: 10px;
-  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 textarea,
@@ -86,24 +71,24 @@ input {
   width: 100%;
   padding: 10px;
   margin: 5px 0;
-  border-radius: 5px;
   border: none;
+  border-radius: 5px;
 }
 
-/* BUTTON */
+/* ================= BUTTON ================= */
 button {
-  padding: 8px;
+  padding: 8px 12px;
   background: #5bc0be;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
-/* POSTS */
+/* ================= POSTS ================= */
 .post {
   background: #1c2541;
-  padding: 10px;
-  margin-top: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
   border-radius: 10px;
 }
 
@@ -111,22 +96,94 @@ button {
   color: #5bc0be;
 }
 
-/* FOOTER */
-.footer {
-  margin-top: 30px;
-  padding: 20px;
+/* ================= ADMIN ================= */
+#usersList {
   background: #1c2541;
-  text-align: center;
-  font-size: 13px;
+  padding: 10px;
+  border-radius: 10px;
 }
 
-/* MOBILE FIX */
-@media (max-width: 600px) {
-  .logo {
-    font-size: 14px;
+.user-card {
+  background: #0b132b;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+}
+
+/* ================= FOOTER ================= */
+.footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 12px;
+  background: #1c2541;
+  margin-top: 30px;
+}
+
+/* ================= CHAT ================= */
+.chat-container {
+  display: flex;
+  height: 85vh;
+  gap: 10px;
+  padding: 10px;
+}
+
+.users-list {
+  width: 30%;
+  background: #1c2541;
+  padding: 10px;
+  border-radius: 10px;
+  overflow-y: auto;
+}
+
+.user-item {
+  background: #0b132b;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.chat-main {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+}
+
+#chatHeader {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.chat-box {
+  flex: 1;
+  background: #1c2541;
+  padding: 10px;
+  border-radius: 10px;
+  overflow-y: auto;
+}
+
+.chat-input {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.chat-input input {
+  flex: 1;
+}
+
+/* ================= MOBILE FIX ================= */
+@media (max-width: 768px) {
+  .container {
+    max-width: 100%;
   }
 
-  .nav-links button {
-    font-size: 12px;
+  .chat-container {
+    flex-direction: column;
+  }
+
+  .users-list,
+  .chat-main {
+    width: 100%;
   }
 }
