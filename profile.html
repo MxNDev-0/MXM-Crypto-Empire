@@ -9,26 +9,20 @@
 <body>
 
 <div class="navbar">
-  <h2>My Profile</h2>
-  <button onclick="goBack()">Back</button>
+  <button onclick="goBack()">←</button>
+  <h3>Profile</h3>
 </div>
 
 <div class="container">
 
   <div class="post-box">
-    <h3>Set Nickname</h3>
-    <input id="nicknameInput" placeholder="Enter nickname">
-    <button onclick="saveName()">Save</button>
-  </div>
-
-  <div class="post-box">
-    <h3>Create Post</h3>
-    <textarea id="postText"></textarea>
+    <textarea id="postText" placeholder="Write something..."></textarea>
     <button onclick="createPost()">Post</button>
   </div>
 
 </div>
 
 <script type="module" src="profile.js"></script>
+
 </body>
 </html>
