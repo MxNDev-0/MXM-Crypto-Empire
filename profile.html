@@ -1,32 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Profile</title>
+  <title>Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div class="navbar">
-  <h2 class="logo">My Profile 👤</h2>
-  <div class="nav-links">
-    <button onclick="goBack()">⬅ Back</button>
-  </div>
+  <h2>My Profile</h2>
+  <button onclick="goBack()">Back</button>
 </div>
 
 <div class="container">
 
   <div class="post-box">
-    <h3>Profile Info</h3>
-    <p>Email: <span id="userEmail"></span></p>
-    <p>Status: <span id="userPremium"></span></p>
+    <h3>Set Nickname</h3>
+    <input id="nicknameInput" placeholder="Enter nickname">
+    <button onclick="saveName()">Save</button>
   </div>
 
   <div class="post-box">
-    <h3>Upload Image 📷</h3>
-    <input type="file" id="fileInput">
-    <button onclick="uploadImage()">Upload</button>
-    <div id="imagePreview"></div>
+    <h3>Create Post</h3>
+    <textarea id="postText"></textarea>
+    <button onclick="createPost()">Post</button>
   </div>
 
 </div>
