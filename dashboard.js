@@ -1,15 +1,15 @@
 import { auth, db } from "./firebase.js";
 
 import {
-  signOut,
   onAuthStateChanged,
+  signOut,
   updatePassword
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
   collection,
   addDoc,
-  getDocs,
+  onSnapshot,
   doc,
   getDoc,
   setDoc
@@ -37,22 +37,41 @@ onAuthStateChanged(auth, async (user) => {
 
   username = (await getDoc(ref)).data().username;
 
-  if (user.email === ADMIN_EMAIL) {
-    document.getElementById("adminPanel").style.display = "block";
-    loadAdminStats();
-  }
-
   loadChat();
-  loadPosts();
+  loadOnlineUsers();
 });
 
-// MENU
+// MENU TOGGLE
 window.toggleMenu = () => {
   const menu = document.getElementById("menu");
   menu.style.display = menu.style.display === "none" ? "block" : "none";
 };
 
-// USERNAME
+// NAVIGATION
+window.goProfile = () => location.href = "profile.html";
+
+window.goUpgrade = () =>
+  location.href = "https://nowpayments.io/payment/?iid=5153003613";
+
+window.goSupport = () =>
+  location.href = "support.html";
+
+window.goFAQ = () =>
+  location.href = "faq.html";
+
+window.openSupport = () =>
+  alert("Contact support: support@mxmcrypto.com");
+
+window.openMySection = () => {
+  if (currentUser.email !== ADMIN_EMAIL) {
+    alert("❌ You are not authorized to access this section.");
+    return;
+  }
+
+  alert("👑 Welcome Admin Office");
+};
+
+// SET USERNAME
 window.setUsername = async () => {
   const name = prompt("Enter username:");
   if (!name) return;
@@ -62,21 +81,20 @@ window.setUsername = async () => {
   });
 
   username = name;
-  alert("Username set!");
+  alert("Username saved");
 };
 
 // CHANGE PASSWORD
 window.changePassword = async () => {
-  const newPass = prompt("Enter new password:");
-  if (!newPass) return;
-
-  await updatePassword(currentUser, newPass);
-  alert("Password updated!");
+  const pass = prompt("New password:");
+  await updatePassword(currentUser, pass);
+  alert("Password updated");
 };
 
-// CHAT
+// CHAT FIX (REAL TIME)
 window.sendMessage = async () => {
-  const text = document.getElementById("chatInput").value;
+  const input = document.getElementById("chatInput");
+  const text = input.value;
 
   if (!username) {
     alert("Set username first");
@@ -86,61 +104,49 @@ window.sendMessage = async () => {
   if (!text) return;
 
   await addDoc(collection(db, "generalChat"), {
-    text,
     name: username,
+    text,
     time: Date.now()
   });
 
-  document.getElementById("chatInput").value = "";
-  loadChat();
+  input.value = "";
 };
 
-// LOAD CHAT
-async function loadChat() {
-  const snap = await getDocs(collection(db, "generalChat"));
-  const box = document.getElementById("chatBox");
+// REAL TIME CHAT LISTENER (FIXED)
+function loadChat() {
+  onSnapshot(collection(db, "generalChat"), (snap) => {
+    const box = document.getElementById("chatBox");
+    box.innerHTML = "";
 
-  box.innerHTML = "";
+    snap.forEach(doc => {
+      const m = doc.data();
 
-  snap.forEach(doc => {
-    const m = doc.data();
-
-    box.innerHTML += `
-      <div style="margin:5px;">
-        <b>${m.name}</b>: ${m.text}
-      </div>
-    `;
+      box.innerHTML += `
+        <div style="margin:5px;">
+          <b>${m.name}</b>: ${m.text}
+        </div>
+      `;
+    });
   });
 }
 
-// POSTS (VISIBLE TO ALL)
-async function loadPosts() {
-  const snap = await getDocs(collection(db, "posts"));
-  const div = document.getElementById("posts");
+// ONLINE USERS
+function loadOnlineUsers() {
+  onSnapshot(collection(db, "users"), (snap) => {
+    const box = document.getElementById("onlineUsers");
+    box.innerHTML = "";
 
-  div.innerHTML = "";
+    snap.forEach(doc => {
+      const u = doc.data();
 
-  snap.forEach(doc => {
-    const p = doc.data();
-
-    div.innerHTML += `
-      <div class="post">
-        <p>${p.text}</p>
-      </div>
-    `;
+      if (u.username) {
+        box.innerHTML += `<div>🟢 ${u.username}</div>`;
+      }
+    });
   });
 }
 
-// ADMIN STATS
-async function loadAdminStats() {
-  const users = await getDocs(collection(db, "users"));
-  const posts = await getDocs(collection(db, "posts"));
-
-  document.getElementById("totalUsers").innerText = users.size;
-  document.getElementById("totalPosts").innerText = posts.size;
-}
-
-// NAV
+// LOGOUT
 window.logout = async () => {
   await signOut(auth);
   location.href = "index.html";
