@@ -200,3 +200,24 @@ background: #5bc0be;
 border: none;
 cursor: pointer;
 }
+/* ================= EARN SECTION ================= */
+
+.earn-card {
+  border: 1px solid #5bc0be;
+  box-shadow: 0 0 8px rgba(91, 192, 190, 0.2);
+}
+
+.earn-card h4 {
+  margin-bottom: 5px;
+  color: #5bc0be;
+}
+
+.earn-card button {
+  background: #22c55e;
+  color: white;
+  font-weight: bold;
+}
+
+.earn-card button:hover {
+  background: #16a34a;
+}
