@@ -2,8 +2,7 @@ import { auth, db } from "./firebase.js";
 
 import {
   onAuthStateChanged,
-  signOut,
-  updatePassword
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
@@ -22,35 +21,42 @@ onAuthStateChanged(auth, (u) => {
 
   user = u;
 
-  loadChat();
+  loadFeed();
   loadUsers();
-  loadPosts();
 });
 
-/* ================= CHAT (FIXED USING POST STYLE) ================= */
+/* ================= FEED (CHAT + POSTS MERGED) ================= */
 window.sendMessage = async () => {
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
 
   if (!text || !user) return;
 
-  await addDoc(collection(db, "chat"), {
-    user: user.email.split("@")[0],
+  await addDoc(collection(db, "posts"), {
     text,
+    user: user.email.split("@")[0],
     time: Date.now()
   });
 
   input.value = "";
 };
 
-function loadChat() {
-  onSnapshot(collection(db, "chat"), (snap) => {
+function loadFeed() {
+  const q = query(collection(db, "posts"), orderBy("time"));
+
+  onSnapshot(q, (snap) => {
     const box = document.getElementById("chatBox");
     box.innerHTML = "";
 
     snap.forEach(d => {
       const m = d.data();
-      box.innerHTML += `<div><b>${m.user}</b>: ${m.text}</div>`;
+
+      box.innerHTML += `
+        <div style="margin:6px 0;">
+          <b style="color:#5bc0be;">${m.user}</b>
+          <div style="color:white;">${m.text}</div>
+        </div>
+      `;
     });
 
     box.scrollTop = box.scrollHeight;
@@ -61,41 +67,29 @@ function loadChat() {
 function loadUsers() {
   onSnapshot(collection(db, "users"), (snap) => {
     const box = document.getElementById("onlineUsers");
+
+    let total = 0;
+    let online = 0;
+
     box.innerHTML = "";
 
     snap.forEach(d => {
       const u = d.data();
+      total++;
+
       if (u.email) {
-        box.innerHTML += `<div>🟢 ${u.email.split("@")[0]}</div>`;
+        online++;
+        box.innerHTML += `<div style="font-size:13px;">🟢 ${u.email.split("@")[0]}</div>`;
       }
     });
-  });
-}
 
-/* ================= POSTS ================= */
-window.createPost = async () => {
-  const text = document.getElementById("postText").value;
+    const offline = total - online;
 
-  if (!text) return alert("Write something");
-
-  await addDoc(collection(db, "posts"), {
-    text,
-    user: user.email.split("@")[0],
-    time: Date.now()
-  });
-
-  document.getElementById("postText").value = "";
-};
-
-function loadPosts() {
-  onSnapshot(collection(db, "posts"), (snap) => {
-    const box = document.getElementById("posts");
-    box.innerHTML = "";
-
-    snap.forEach(d => {
-      const p = d.data();
-      box.innerHTML += `<div><b>${p.user}</b><p>${p.text}</p></div>`;
-    });
+    box.innerHTML = `
+      <div style="margin-bottom:6px;font-size:13px;">
+        🟢 Online: ${online} | ⚪ Offline: ${offline}
+      </div>
+    ` + box.innerHTML;
   });
 }
 
@@ -130,13 +124,11 @@ window.goAdmin = () => {
   alert("✅ Welcome to Admin Office");
 };
 
-/* SUPPORT DISABLED */
 window.support = () => {
   closeMenu();
   alert("Support not active yet");
 };
 
-/* UPGRADE */
 window.upgrade = () => {
   closeMenu();
   window.open("https://nowpayments.io/payment/?iid=5153003613");
