@@ -96,25 +96,35 @@ function loadWallet() {
   });
 }
 
-/* ================= BTC PRICE ================= */
-async function loadBTCPrice() {
+/* ================= ✅ FIXED CRYPTO (BTC + ETH + BNB + USDT) ================= */
+async function loadCryptoPrices() {
+  const el = document.getElementById("btcPrice");
+  if (!el) return;
+
   try {
     const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,tether&vs_currencies=usd"
     );
 
     const data = await res.json();
 
-    const btcEl = document.getElementById("btcPrice");
-    if (btcEl) btcEl.innerText = data.bitcoin.usd;
+    if (!data.bitcoin) throw new Error("API failed");
+
+    el.innerText =
+      "BTC: $" + data.bitcoin.usd +
+      " | ETH: $" + data.ethereum.usd +
+      " | BNB: $" + data.binancecoin.usd +
+      " | USDT: $" + data.tether.usd;
 
   } catch (err) {
-    const btcEl = document.getElementById("btcPrice");
-    if (btcEl) btcEl.innerText = "Error";
+    // ✅ fallback (important)
+    el.innerText = "Crypto prices unavailable (API limit)";
   }
 }
 
-setInterval(loadBTCPrice, 30000);
+/* refresh every 30s */
+setInterval(loadCryptoPrices, 30000);
+
 
 /* ================= 🚀 UPGRADE FIX (FINAL WORKING VERSION) ================= */
 
