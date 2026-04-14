@@ -1,74 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>MXM Crypto Empire — Genesis Beta v1</title>
+  <title>MXM Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- LOADER (IMPORTANT FIX) -->
-<div id="loader" style="
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:#0b132b;
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:18px;
-  z-index:9999;
-">
-  Loading dashboard...
-</div>
+<div id="loader">Loading...</div>
 
 <div class="navbar">
-  <h2 class="logo">
-    MXM Crypto Empire — Genesis Beta v1
-    <span class="beta">BETA</span>
-  </h2>
+  <h2 class="logo">MXM Dashboard</h2>
 
   <div class="nav-links">
     <button onclick="goHome()">Home</button>
     <button onclick="goProfile()">Profile</button>
-    <button onclick="goAdmin()">Admin</button>
-    <button onclick="support()">Support 💰</button>
+    <button onclick="goUpgrade()">Upgrade 🚀</button>
+    <button onclick="goSupport()">Support 💰</button>
+    <button onclick="goChat()">Chat 💬</button>
     <button onclick="logout()">Logout</button>
   </div>
 </div>
 
 <div class="container">
 
-  <div class="analytics">
-    <h3>📊 Analytics</h3>
-    <p>Total Posts: <span id="totalPosts">0</span></p>
-    <p>Total Clicks: <span id="totalClicks">0</span></p>
-    <p>Total Likes: <span id="totalLikes">0</span></p>
-    <p>Top Post: <span id="topPost">None</span></p>
-  </div>
-
-  <div id="adminPanel" style="display:none;">
-    <h3>👑 Admin Dashboard</h3>
-    <button onclick="sendNotification()">Send Notification 🔔</button>
-    <div id="usersList"></div>
-  </div>
-
   <div class="post-box">
-    <textarea id="postText" placeholder="Share something..."></textarea>
-    <input type="text" id="postLink" placeholder="Optional link (v2 only)">
-    <button onclick="createPost()">Post</button>
+    <textarea id="postText" placeholder="What's on your mind?"></textarea>
+
+    <div style="display:flex; gap:5px;">
+      <button onclick="openUpload()">📎</button>
+      <button onclick="createPost()">Post</button>
+    </div>
   </div>
 
   <div id="posts"></div>
 
-</div>
-
-<div class="footer">
-  ⚠️ Educational platform only. No financial guarantees.
-  <br><br>
-  © 2026 MXM Crypto Empire
 </div>
 
 <script type="module" src="dashboard.js"></script>
