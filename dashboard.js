@@ -12,8 +12,7 @@ import {
   query,
   orderBy,
   doc,
-  setDoc,
-  updateDoc
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let user = null;
@@ -32,7 +31,7 @@ onAuthStateChanged(auth, async (u) => {
   loadCryptoPrices();
 });
 
-/* ================= FEED (FIXED PRIVATE FILTER) ================= */
+/* ================= FEED (FINAL FIX: PUBLIC/PRIVATE) ================= */
 function loadFeed() {
   const q = query(collection(db, "posts"), orderBy("time"));
 
@@ -45,8 +44,11 @@ function loadFeed() {
     snap.forEach(docSnap => {
       const m = docSnap.data();
 
-      // ❌ HIDE PRIVATE POSTS FROM DASHBOARD
-      if (m.visibility === "private") return;
+      // 🔥 FIX: default visibility = public
+      const visibility = m.visibility ?? "public";
+
+      // ❌ hide private posts
+      if (visibility === "private") return;
 
       box.innerHTML += `
         <div style="margin:6px 0;">
@@ -71,7 +73,7 @@ window.sendMessage = async () => {
   await addDoc(collection(db, "posts"), {
     text,
     user: user.email.split("@")[0],
-    visibility: "public",
+    visibility: "public", // 🔥 always public default
     time: Date.now()
   });
 
@@ -125,7 +127,7 @@ async function loadCryptoPrices() {
 
 setInterval(loadCryptoPrices, 30000);
 
-/* ================= UPGRADE ================= */
+/* ================= UPGRADE SYSTEM (FIXED) ================= */
 const UPGRADE_LINK = "https://nowpayments.io/payment/?iid=5153003613";
 
 function handleUpgrade() {
@@ -133,12 +135,13 @@ function handleUpgrade() {
 
   window.open(UPGRADE_LINK, "_blank");
 
+  // 🔥 FIX: prevent duplicate overwrite issues
   setDoc(doc(db, "upgradeRequests", user.uid), {
     uid: user.uid,
     email: user.email,
     status: "pending",
     createdAt: Date.now()
-  });
+  }, { merge: true });
 }
 
 window.goPremium = handleUpgrade;
