@@ -20,16 +20,22 @@ let user = null;
 
 /* ================= AUTH CHECK ================= */
 onAuthStateChanged(auth, (u) => {
-  if (!u) location.href = "index.html";
+  if (!u) {
+    location.href = "index.html";
+    return;
+  }
+
   user = u;
 
   loadFeed();
-  loadWallet(); // NEW
-  loadBTCPrice(); // NEW
+  loadWallet();
+  loadBTCPrice();
 });
 
 /* ================= CHAT SYSTEM ================= */
-window.sendMessage = async () => {
+window.sendMessage = async function () {
+  if (!user) return;
+
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
 
@@ -50,9 +56,11 @@ function loadFeed() {
 
   onSnapshot(q, (snap) => {
     const box = document.getElementById("chatBox");
+    if (!box) return;
+
     box.innerHTML = "";
 
-    snap.forEach(docSnap => {
+    snap.forEach((docSnap) => {
       const m = docSnap.data();
 
       box.innerHTML += `
@@ -67,29 +75,29 @@ function loadFeed() {
   });
 }
 
-/* ================= WALLET (READ ONLY) ================= */
+/* ================= WALLET ================= */
 function loadWallet() {
   const walletRef = doc(db, "wallet", "main");
 
   onSnapshot(walletRef, (snap) => {
-    if (snap.exists()) {
-      const data = snap.data();
+    if (!snap.exists()) return;
 
-      const balanceEl = document.getElementById("walletBalance");
-      const updatedEl = document.getElementById("walletUpdated");
+    const data = snap.data();
 
-      if (balanceEl) balanceEl.innerText = data.balance || 0;
+    const balanceEl = document.getElementById("walletBalance");
+    const updatedEl = document.getElementById("walletUpdated");
 
-      if (updatedEl) {
-        updatedEl.innerText = data.lastUpdated
-          ? new Date(data.lastUpdated).toLocaleString()
-          : "-";
-      }
+    if (balanceEl) balanceEl.innerText = data.balance || 0;
+
+    if (updatedEl) {
+      updatedEl.innerText = data.lastUpdated
+        ? new Date(data.lastUpdated).toLocaleString()
+        : "-";
     }
   });
 }
 
-/* ================= LIVE BTC PRICE ================= */
+/* ================= BTC PRICE ================= */
 async function loadBTCPrice() {
   try {
     const res = await fetch(
@@ -101,7 +109,7 @@ async function loadBTCPrice() {
     const btcEl = document.getElementById("btcPrice");
 
     if (btcEl) {
-      btcEl.innerText = data.bitcoin.usd;
+      btcEl.innerText = data.bitcoin?.usd || "N/A";
     }
   } catch (err) {
     const btcEl = document.getElementById("btcPrice");
@@ -109,38 +117,38 @@ async function loadBTCPrice() {
   }
 }
 
-/* refresh BTC every 30 seconds */
 setInterval(loadBTCPrice, 30000);
 
-/* ================= 🚀 UPGRADE SYSTEM (NOWPAYMENTS + FIREBASE) ================= */
+/* ================= 🚀 UPGRADE SYSTEM ================= */
 
 const UPGRADE_LINK = "https://nowpayments.io/payment/?iid=5153003613";
 
-/**
- * Upgrade button handler
- */
-window.goPremium = async () => {
-  if (!user) return;
+// 🔥 THIS IS THE ONLY FUNCTION YOUR BUTTON MUST CALL
+window.goPremium = function () {
+  console.log("Upgrade clicked");
 
-  // Open payment page
+  if (!user) {
+    alert("Please login first");
+    return;
+  }
+
+  // open payment page
   window.open(UPGRADE_LINK, "_blank");
 
-  // Save upgrade request in Firebase
-  await setDoc(doc(db, "upgradeRequests", user.uid), {
+  // save request in Firebase
+  setDoc(doc(db, "upgradeRequests", user.uid), {
     uid: user.uid,
     email: user.email,
     status: "pending",
     source: "NOWPayments",
     createdAt: Date.now()
-  });
+  }).catch(console.error);
 
-  alert("Upgrade request sent. Complete payment to activate premium.");
+  alert("Upgrade started. Complete payment to activate premium.");
 };
 
-/**
- * Admin approval (future use)
- */
-window.confirmUpgrade = async (uid) => {
+/* ================= ADMIN UPGRADE (FUTURE) ================= */
+window.confirmUpgrade = async function (uid) {
   await updateDoc(doc(db, "users", uid), {
     premium: true,
     upgradedAt: Date.now()
@@ -150,8 +158,10 @@ window.confirmUpgrade = async (uid) => {
 };
 
 /* ================= MENU ================= */
-window.toggleMenu = () => {
+window.toggleMenu = function () {
   const m = document.getElementById("menu");
+  if (!m) return;
+
   m.style.display = (m.style.display === "block") ? "none" : "block";
 };
 
@@ -160,17 +170,17 @@ function closeMenu() {
   if (m) m.style.display = "none";
 }
 
-window.goProfile = () => {
+window.goProfile = function () {
   closeMenu();
   location.href = "profile.html";
 };
 
-window.goHome = () => {
+window.goHome = function () {
   closeMenu();
   location.reload();
 };
 
-window.goAdmin = () => {
+window.goAdmin = function () {
   closeMenu();
 
   if (!user) return;
@@ -184,6 +194,6 @@ window.goAdmin = () => {
 };
 
 /* ================= LOGOUT ================= */
-window.logout = () => {
+window.logout = function () {
   signOut(auth).then(() => location.href = "index.html");
 };
