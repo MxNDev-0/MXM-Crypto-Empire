@@ -6,21 +6,81 @@ body {
   color: white;
 }
 
-/* ================= LOGIN ================= */
+/* ================= LOGIN (FIXED ALIGNMENT) ================= */
+
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0b132b;
+  color: white;
+}
+
 .login-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  padding: 15px;
+  box-sizing: border-box;
 }
 
 .center-box {
-  width: 90%;
-  max-width: 320px;
+  width: 100%;
+  max-width: 340px;
   background: #1c2541;
-  padding: 20px;
-  border-radius: 10px;
+  padding: 25px 20px;
+  border-radius: 12px;
   text-align: center;
+  box-sizing: border-box;
+}
+
+/* TITLE */
+.center-box h2 {
+  margin: 0 0 5px 0;
+}
+
+/* BADGE */
+.gold-badge {
+  display: inline-block;
+  margin-bottom: 15px;
+  background: gold;
+  color: black;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+/* INPUT FIX (KEY PART) */
+input {
+  width: 100%;
+  display: block;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  box-sizing: border-box; /* 🔥 fixes left/right misalignment */
+  font-size: 14px;
+}
+
+/* BUTTON FIX */
+button {
+  width: 100%;
+  display: block;
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  background: #5bc0be;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* extra spacing consistency */
+.center-box button:first-of-type {
+  margin-top: 15px;
 }
 
 input {
