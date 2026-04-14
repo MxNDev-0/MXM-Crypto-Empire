@@ -9,54 +9,33 @@
 <body>
 
 <div class="navbar">
-
-  <button onclick="toggleMenu()">☰</button>
-
   <h3>MXM Dashboard</h3>
-
   <button onclick="logout()">Logout</button>
-
-</div>
-
-<!-- HAMBURGER MENU -->
-<div id="menu" style="display:none;" class="menu">
-
-  <p id="userEmail"></p>
-
-  <button onclick="goProfile()">Profile</button>
-  <button onclick="goUpgrade()">Upgrade</button>
-  <button onclick="goSupport()">Support</button>
-  <button onclick="goFAQ()">FAQ</button>
-  <button onclick="openSupport()">Contact Support</button>
-  <button onclick="openMySection()">My Section</button>
-  <button onclick="setUsername()">Set Username</button>
-  <button onclick="changePassword()">Change Password</button>
-
 </div>
 
 <div class="container">
 
   <!-- ONLINE USERS -->
-  <div class="post-box">
+  <div class="card">
     <h4>🟢 Online Users</h4>
     <div id="onlineUsers"></div>
   </div>
 
   <!-- GENERAL CHAT -->
-  <div class="post-box">
+  <div class="card">
     <h4>💬 General Chat</h4>
 
-    <div id="chatBox" class="chat-box"></div>
+    <div id="chatBox" class="chatBox"></div>
 
-    <div class="chat-input">
-      <input id="chatInput" placeholder="Type message...">
+    <div class="row">
+      <input id="chatInput" placeholder="Message...">
       <button onclick="sendMessage()">Send</button>
     </div>
 
   </div>
 
-  <!-- GLOBAL POSTS -->
-  <div class="post-box">
+  <!-- POSTS (READ ONLY) -->
+  <div class="card">
     <h4>📝 Global Posts</h4>
     <div id="posts"></div>
   </div>
@@ -64,6 +43,5 @@
 </div>
 
 <script type="module" src="dashboard.js"></script>
-
 </body>
 </html>
