@@ -44,10 +44,7 @@ function loadFeed() {
     snap.forEach(docSnap => {
       const m = docSnap.data();
 
-      // 🔥 FIX: default visibility = public
       const visibility = m.visibility ?? "public";
-
-      // ❌ hide private posts
       if (visibility === "private") return;
 
       box.innerHTML += `
@@ -73,7 +70,7 @@ window.sendMessage = async () => {
   await addDoc(collection(db, "posts"), {
     text,
     user: user.email.split("@")[0],
-    visibility: "public", // 🔥 always public default
+    visibility: "public",
     time: Date.now()
   });
 
@@ -127,21 +124,36 @@ async function loadCryptoPrices() {
 
 setInterval(loadCryptoPrices, 30000);
 
-/* ================= UPGRADE SYSTEM (FIXED) ================= */
-const UPGRADE_LINK = "https://nowpayments.io/payment/?iid=5153003613";
+/* ================= UPGRADE SYSTEM (CONNECTED TO BACKEND) ================= */
+async function handleUpgrade() {
+  try {
+    if (!user) {
+      alert("Login required");
+      return;
+    }
 
-function handleUpgrade() {
-  if (!user) return alert("Login required");
+    const response = await fetch("https://mxm-backend.onrender.com/create-payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userId: user.uid
+      })
+    });
 
-  window.open(UPGRADE_LINK, "_blank");
+    const data = await response.json();
 
-  // 🔥 FIX: prevent duplicate overwrite issues
-  setDoc(doc(db, "upgradeRequests", user.uid), {
-    uid: user.uid,
-    email: user.email,
-    status: "pending",
-    createdAt: Date.now()
-  }, { merge: true });
+    if (data.payment_url) {
+      window.location.href = data.payment_url;
+    } else {
+      alert("Payment failed");
+    }
+
+  } catch (error) {
+    console.error("Payment error:", error);
+    alert("Something went wrong");
+  }
 }
 
 window.goPremium = handleUpgrade;
