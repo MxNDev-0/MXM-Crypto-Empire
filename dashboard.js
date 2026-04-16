@@ -11,8 +11,7 @@ import {
   onSnapshot,
   query,
   orderBy,
-  doc,
-  setDoc
+  doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let user = null;
@@ -124,7 +123,7 @@ async function loadCryptoPrices() {
 
 setInterval(loadCryptoPrices, 30000);
 
-/* ================= UPGRADE SYSTEM (FIXED - SECURE BACKEND) ================= */
+/* ================= UPGRADE SYSTEM (FULL DEBUG FIX) ================= */
 async function handleUpgrade() {
   try {
     if (!user) {
@@ -134,7 +133,6 @@ async function handleUpgrade() {
 
     console.log("UPGRADE CLICKED");
 
-    // 🔥 GET FIREBASE ID TOKEN (IMPORTANT)
     const token = await user.getIdToken();
 
     const response = await fetch("https://mxm-backend.onrender.com/create-payment", {
@@ -147,17 +145,23 @@ async function handleUpgrade() {
 
     const data = await response.json();
 
-    console.log("BACKEND RESPONSE:", data);
+    console.log("STATUS:", response.status);
+    console.log("RESPONSE:", data);
+
+    if (!response.ok) {
+      alert("ERROR: " + JSON.stringify(data));
+      return;
+    }
 
     if (data.payment_url) {
       window.location.href = data.payment_url;
     } else {
-      alert("Payment failed: " + JSON.stringify(data));
+      alert("No payment URL returned: " + JSON.stringify(data));
     }
 
-  } catch (error) {
-    console.error("Upgrade error:", error);
-    alert("Something went wrong");
+  } catch (err) {
+    console.error("UPGRADE ERROR:", err);
+    alert("Something went wrong: " + err.message);
   }
 }
 
