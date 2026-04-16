@@ -31,7 +31,7 @@ onAuthStateChanged(auth, async (u) => {
   loadCryptoPrices();
 });
 
-/* ================= FEED (FINAL FIX: PUBLIC/PRIVATE) ================= */
+/* ================= FEED ================= */
 function loadFeed() {
   const q = query(collection(db, "posts"), orderBy("time"));
 
@@ -124,7 +124,7 @@ async function loadCryptoPrices() {
 
 setInterval(loadCryptoPrices, 30000);
 
-/* ================= UPGRADE SYSTEM (CONNECTED TO BACKEND) ================= */
+/* ================= UPGRADE SYSTEM (FIXED - SECURE BACKEND) ================= */
 async function handleUpgrade() {
   try {
     if (!user) {
@@ -132,26 +132,31 @@ async function handleUpgrade() {
       return;
     }
 
+    console.log("UPGRADE CLICKED");
+
+    // 🔥 GET FIREBASE ID TOKEN (IMPORTANT)
+    const token = await user.getIdToken();
+
     const response = await fetch("https://mxm-backend.onrender.com/create-payment", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        userId: user.uid
-      })
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      }
     });
 
     const data = await response.json();
 
+    console.log("BACKEND RESPONSE:", data);
+
     if (data.payment_url) {
       window.location.href = data.payment_url;
     } else {
-      alert("Payment failed");
+      alert("Payment failed: " + JSON.stringify(data));
     }
 
   } catch (error) {
-    console.error("Payment error:", error);
+    console.error("Upgrade error:", error);
     alert("Something went wrong");
   }
 }
