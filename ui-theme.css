@@ -128,3 +128,23 @@ input {
   background: #5bc0be;
   border-radius: 10px;
 }
+
+/* ================= FIXED BACK BUTTON (BLOG STYLE FLOATING NAV) ================= */
+.back-btn {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  background: #5bc0be;
+  color: #000;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 50px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 9999;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.back-btn:hover {
+  opacity: 0.85;
+}
