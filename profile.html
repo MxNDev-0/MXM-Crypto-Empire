@@ -31,8 +31,26 @@
 
 </div>
 
-<!-- FLOAT BACK BUTTON -->
-<button class="back-float" onclick="history.back()">←</button>
+<!-- CLEAN SMALL BACK BUTTON (BLOG STYLE) -->
+<div style="
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+">
+  <button onclick="history.back()" style="
+    background: #5bc0be;
+    color: #000;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  ">
+    ← Back
+  </button>
+</div>
 
 <script type="module" src="profile.js"></script>
 </body>
