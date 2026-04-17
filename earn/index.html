@@ -16,12 +16,60 @@
     Learn how to earn money using simple online platforms. This section guides you step-by-step into understanding how online earning systems work, how creators monetize content, and how beginners can get started without technical skills.
   </p>
 
-  <!-- BUTTON (NOT LINK STYLE) -->
-  <button onclick="location.href='forfans.html'">
+  <!-- PREMIUM LOCK BUTTON -->
+  <button onclick="checkPremium()">
     🚀 Go to ForFans Guide
   </button>
 
 </div>
+
+<script type="module">
+import { auth } from "../firebase.js";
+import { db } from "../firebase.js";
+
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+let currentUser = null;
+
+/* ================= AUTH ================= */
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+});
+
+/* ================= PREMIUM CHECK ================= */
+window.checkPremium = async () => {
+
+  if (!currentUser) {
+    alert("Please login first");
+    location.href = "../index.html";
+    return;
+  }
+
+  const ref = doc(db, "users", currentUser.uid);
+  const snap = await getDoc(ref);
+
+  const isPremium = snap.exists() && snap.data().premium === true;
+
+  if (!isPremium) {
+
+    const confirmUpgrade = confirm(
+      "⚠️ This feature is for PREMIUM users only.\n\n" +
+      "Upgrade now to unlock earning tools.\n\n" +
+      "Payments are NON-REFUNDABLE and results are NOT guaranteed."
+    );
+
+    if (confirmUpgrade) {
+      location.href = "../dashboard.html";
+    }
+
+    return;
+  }
+
+  /* ✅ ALLOW ACCESS */
+  location.href = "forfans.html";
+};
+</script>
 
 </body>
 </html>
