@@ -23,7 +23,7 @@
       margin-top: 20px;
     }
 
-    input {
+    input, textarea {
       width: 100%;
       padding: 10px;
       margin: 6px 0;
@@ -35,21 +35,20 @@
       box-sizing: border-box;
     }
 
+    textarea {
+      min-height: 80px;
+      resize: none;
+    }
+
     .grid button {
       width: 100%;
       padding: 10px;
       margin-top: 8px;
-      border: none;
       border-radius: 8px;
       background: #5bc0be;
       color: #000;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .grid button:hover {
-      opacity: 0.85;
     }
 
     .danger {
@@ -73,27 +72,25 @@
       border-radius: 8px;
       font-size: 14px;
     }
-
-    @media (max-width: 600px) {
-      body { padding: 10px; }
-    }
   </style>
 </head>
 
 <body>
 
 <div class="navbar">
-  <h3>👑 MXM Engine v7 Admin</h3>
+  <h3>👑 Admin Control Panel V10</h3>
 </div>
 
 <div class="grid">
 
+  <!-- WALLET -->
   <div class="card">
     <h3>💰 Wallet</h3>
     <input id="balanceInput" placeholder="Enter new balance">
     <button onclick="updateWallet()">Update Wallet</button>
   </div>
 
+  <!-- EARNINGS -->
   <div class="card">
     <h3>➕ Earnings</h3>
     <input id="source" placeholder="Source">
@@ -101,25 +98,96 @@
     <button onclick="addEarning()">Add Earnings</button>
   </div>
 
+  <!-- USERS -->
   <div class="card">
     <h3>👥 Users</h3>
     <div id="usersList" class="list-box"></div>
   </div>
 
+  <!-- UPGRADES -->
   <div class="card">
     <h3>🚀 Upgrade Requests</h3>
     <div id="upgradeList" class="list-box"></div>
   </div>
 
+  <!-- POSTS -->
   <div class="card">
     <h3>💬 Posts Control</h3>
     <button class="danger" onclick="clearAllPosts()">Clear All Posts</button>
     <div id="postsList" class="list-box"></div>
   </div>
 
+  <!-- 🔥 NEW: CREATE AD -->
+  <div class="card">
+    <h3>📢 Create Ad</h3>
+    <input id="adTitle" placeholder="Ad Title">
+    <textarea id="adText" placeholder="Ad Description"></textarea>
+    <input id="adLink" placeholder="Ad Link">
+    <button onclick="createAd()">Publish Ad</button>
+  </div>
+
+  <!-- 🔥 NEW: AUTO BLOG -->
+  <div class="card">
+    <h3>🤖 Auto Blog Generator</h3>
+    <input id="blogTopic" placeholder="Enter Topic (e.g Crypto)">
+    <button onclick="generateBlog()">Generate Blog</button>
+  </div>
+
 </div>
 
 <script type="module" src="admin.js"></script>
+
+<script>
+
+/* ================= CREATE AD ================= */
+async function createAd() {
+  const title = document.getElementById("adTitle").value;
+  const text = document.getElementById("adText").value;
+  const link = document.getElementById("adLink").value;
+
+  if (!title || !text || !link) {
+    alert("Fill all ad fields");
+    return;
+  }
+
+  await fetch("https://mxm-backend.onrender.com/ads/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      title,
+      text,
+      link
+    })
+  });
+
+  alert("Ad created successfully");
+}
+
+/* ================= AUTO BLOG ================= */
+async function generateBlog() {
+  const topic = document.getElementById("blogTopic").value;
+
+  if (!topic) {
+    alert("Enter a topic");
+    return;
+  }
+
+  await fetch("https://mxm-backend.onrender.com/blog/auto-create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      topic
+    })
+  });
+
+  alert("Auto blog created");
+}
+
+</script>
 
 </body>
 </html>
