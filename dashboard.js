@@ -20,29 +20,35 @@ import {
 
 let user = null;
 let userData = null;
-let isUserReady = false; // 🔒 FIX: state gate
+let isUserReady = false;
 
-/* ================= AUTH ================= */
+/* ================= AUTH BOOT ================= */
 onAuthStateChanged(auth, async (u) => {
   if (!u) {
     location.href = "index.html";
     return;
   }
 
-  user = u;
+  try {
+    user = u;
 
-  await ensureUser();
-  await loadUser();
+    await ensureUser();
+    await loadUser();
 
-  isUserReady = true; // 🔥 FIX: unlock system after load
+    isUserReady = true;
 
-  applyUIRestrictions();
+    applyUIRestrictions();
 
-  loadUsers();
-  loadFeed();
+    loadUsers();
+    loadFeed();
+
+  } catch (err) {
+    console.error("BOOT ERROR:", err);
+    alert("Failed to load dashboard. Check console.");
+  }
 });
 
-/* ================= USER ================= */
+/* ================= USER SETUP ================= */
 async function ensureUser() {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
@@ -58,11 +64,28 @@ async function ensureUser() {
 }
 
 async function loadUser() {
-  const snap = await getDoc(doc(db, "users", user.uid));
-  if (snap.exists()) userData = snap.data();
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
+
+    if (snap.exists()) {
+      userData = snap.data();
+    } else {
+      userData = {
+        role: "user",
+        isPremium: false
+      };
+    }
+  } catch (err) {
+    console.error("loadUser error:", err);
+
+    userData = {
+      role: "user",
+      isPremium: false
+    };
+  }
 }
 
-/* ================= UI LOCK SYSTEM ================= */
+/* ================= UI RESTRICTIONS ================= */
 function applyUIRestrictions() {
   if (!userData) return;
 
@@ -85,7 +108,10 @@ function applyUIRestrictions() {
 /* ================= USERS ================= */
 function loadUsers() {
   const box = document.getElementById("onlineUsers");
-  if (!box) return;
+  if (!box) {
+    console.error("onlineUsers missing in HTML");
+    return;
+  }
 
   onSnapshot(collection(db, "onlineUsers"), (snap) => {
     box.innerHTML = "";
@@ -99,44 +125,60 @@ function loadUsers() {
         </div>
       `;
     });
+  }, (err) => {
+    console.error("Users error:", err);
+    box.innerHTML = "<p style='color:red;'>Failed to load users</p>";
   });
 }
 
 /* ================= FEED ================= */
 function loadFeed() {
   const box = document.getElementById("chatBox");
-  if (!box) return;
 
-  const q = query(collection(db, "posts"), orderBy("time", "desc"));
+  if (!box) {
+    console.error("chatBox missing in HTML");
+    return;
+  }
 
-  onSnapshot(q, (snap) => {
-    box.innerHTML = "";
+  try {
+    const q = query(collection(db, "posts"), orderBy("time", "desc"));
 
-    if (snap.empty) {
-      box.innerHTML = "<p style='opacity:0.6;'>No posts yet...</p>";
-      return;
-    }
+    onSnapshot(q, (snap) => {
+      box.innerHTML = "";
 
-    snap.forEach(docSnap => {
-      const m = docSnap.data();
+      if (snap.empty) {
+        box.innerHTML = "<p style='opacity:0.6;'>No posts yet...</p>";
+        return;
+      }
 
-      if (!m || !m.text) return;
+      snap.forEach(docSnap => {
+        const m = docSnap.data();
 
-      box.innerHTML += `
-        <div class="msg" style="margin:6px 0;padding:6px;background:#0b132b;border-radius:6px;">
-          <b>${m.user || "user"}</b><br/>
-          ${m.text}
-        </div>
-      `;
+        if (!m?.text) return;
+
+        box.innerHTML += `
+          <div style="margin:6px 0;padding:6px;background:#0b132b;border-radius:6px;">
+            <b>${m.user || "user"}</b><br/>
+            ${m.text}
+          </div>
+        `;
+      });
+
+      box.scrollTop = box.scrollHeight;
+
+    }, (err) => {
+      console.error("Feed error:", err);
+      box.innerHTML = "<p style='color:red;'>Feed failed to load</p>";
     });
 
-    box.scrollTop = box.scrollHeight;
-  });
+  } catch (err) {
+    console.error("loadFeed crash:", err);
+  }
 }
 
 /* ================= SEND MESSAGE ================= */
 window.sendMessage = async function () {
-  if (!isUserReady) return; // 🔥 FIX: prevent early execution
+  if (!isUserReady) return;
 
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
@@ -177,41 +219,3 @@ window.support = () => alert("Support coming soon");
 window.goFaq = () => location.href = "faq.html";
 window.goAbout = () => location.href = "about.html";
 window.goBlog = () => location.href = "blog/index.html";
-
-/* ================= 🔒 CLICK GUARD (SAFE FIXED VERSION) ================= */
-
-function showToast(msg) {
-  const el = document.createElement("div");
-
-  el.innerText = msg;
-  el.style.position = "fixed";
-  el.style.bottom = "20px";
-  el.style.left = "50%";
-  el.style.transform = "translateX(-50%)";
-  el.style.background = "#1c2541";
-  el.style.color = "#fff";
-  el.style.padding = "10px 14px";
-  el.style.borderRadius = "8px";
-  el.style.zIndex = "99999";
-  el.style.fontSize = "13px";
-
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 2000);
-}
-
-/* ONLY RUN WHEN USER IS READY */
-document.addEventListener("click", (e) => {
-  if (!isUserReady) return;
-
-  const premiumBtn = e.target.closest(".premium-only");
-  if (premiumBtn && !userData?.isPremium) {
-    e.preventDefault();
-    showToast("🔒 Premium only feature");
-  }
-
-  const ads = e.target.closest(".ads-only");
-  if (ads && !isAllowed("ads", userData)) {
-    e.preventDefault();
-    showToast("📢 Ads feature locked");
-  }
-});
