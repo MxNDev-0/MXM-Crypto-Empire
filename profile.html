@@ -40,15 +40,24 @@
       padding: 10px;
       display: none;
       width: 200px;
+      z-index: 10;
     }
 
     .dropdown input {
       margin-bottom: 6px;
+      width: 100%;
+      padding: 6px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
     }
 
     .dropdown button {
       width: 100%;
       margin-top: 5px;
+      padding: 6px;
+      font-size: 12px;
+      border-radius: 6px;
     }
 
     .username-box {
@@ -56,6 +65,90 @@
       margin-bottom: 15px;
       font-size: 16px;
       color: #5bc0be;
+    }
+
+    /* =========================
+       🔥 POST UI UPGRADE
+    ========================== */
+
+    #postInput {
+      width: 100%;
+      min-height: 120px;
+      max-height: 180px;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 14px;
+      background: #0b132b;
+      color: white;
+      box-shadow: inset 0 0 0 1px #1c2541;
+    }
+
+    .card {
+      background: #1c2541;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 12px;
+    }
+
+    /* =========================
+       🔥 POST VISIBILITY BUTTONS SMALL
+    ========================== */
+
+    .controls {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .controls button {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      background: #5bc0be;
+      color: #000;
+    }
+
+    .controls button:hover {
+      opacity: 0.85;
+    }
+
+    /* TAGS */
+    .tag-private,
+    .tag-public {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    .tag-private {
+      background: #ef4444;
+    }
+
+    .tag-public {
+      background: #22c55e;
+    }
+
+    /* POST ITEM */
+    .post {
+      padding: 10px;
+      border-radius: 10px;
+      background: #0b132b;
+      margin-bottom: 10px;
+    }
+
+    /* BUTTON FIX */
+    .small-nav-btn {
+      margin-top: 10px;
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 8px;
+      background: #5bc0be;
+      border: none;
     }
   </style>
 </head>
@@ -88,15 +181,20 @@
     ⬅ Back
   </button>
 
+  <!-- CREATE POST -->
   <div class="card">
     <h4>Create Post</h4>
+
     <textarea id="postInput" placeholder="Write something..."></textarea>
 
     <div style="display:flex;justify-content:flex-end;margin-top:10px;">
-      <button onclick="createPost()" style="width:auto;">Post</button>
+      <button onclick="createPost()" style="width:auto;padding:6px 10px;border-radius:8px;">
+        Post
+      </button>
     </div>
   </div>
 
+  <!-- POSTS -->
   <div class="card">
     <h4>My Posts</h4>
     <div id="myPosts"></div>
