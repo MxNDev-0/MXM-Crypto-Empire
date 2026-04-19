@@ -27,12 +27,36 @@ onAuthStateChanged(auth, async (u) => {
 
   user = u;
 
+  await ensureUsername(); // ✅ NEW (safe injection)
   await registerOnline();
+
   loadUsers();
   loadFeed();
   loadWallet();
   loadCryptoPrices();
 });
+
+/* =========================
+   ✅ ENSURE USERNAME EXISTS
+   ========================= */
+async function ensureUsername() {
+  const ref = doc(db, "users", user.uid);
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) {
+    await setDoc(ref, {
+      email: user.email,
+      username: user.email.split("@")[0],
+      createdAt: Date.now()
+    }, { merge: true });
+  } else {
+    if (!snap.data().username) {
+      await setDoc(ref, {
+        username: user.email.split("@")[0]
+      }, { merge: true });
+    }
+  }
+}
 
 /* USERNAME */
 async function getUsername() {
