@@ -36,42 +36,45 @@ onAuthStateChanged(auth, async (u) => {
   loadCryptoPrices();
 });
 
-/* ================= USER PROFILE INIT ================= */
+/* ================= OWNER FIX (CRITICAL) ================= */
 async function ensureUserProfile() {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
 
   const defaultUsername = user.email.split("@")[0];
 
+  const isOwner =
+    user.email.includes("mxn") ||
+    user.email === "admin@admin.com";
+
   if (!snap.exists()) {
     await setDoc(ref, {
       email: user.email,
       username: defaultUsername,
-      role: "user",
+      role: isOwner ? "admin" : "user",
       createdAt: Date.now()
     });
   } else {
     const data = snap.data();
 
     await setDoc(ref, {
-      username: data.username || defaultUsername
+      username: data.username || defaultUsername,
+      role: isOwner ? "admin" : (data.role || "user")
     }, { merge: true });
   }
 }
 
-/* ================= USERNAME ================= */
+/* ================= GET USERNAME ================= */
 async function getUsername() {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
 
-  if (snap.exists()) {
-    return snap.data().username || user.email.split("@")[0];
-  }
+  if (!snap.exists()) return user.email.split("@")[0];
 
-  return user.email.split("@")[0];
+  return snap.data().username || user.email.split("@")[0];
 }
 
-/* ================= ONLINE TRACK ================= */
+/* ================= ONLINE USERS ================= */
 async function registerOnline() {
   const name = await getUsername();
 
@@ -85,12 +88,14 @@ async function registerOnline() {
 /* ================= USERS ================= */
 function loadUsers() {
   const box = document.getElementById("onlineUsers");
+  if (!box) return;
 
   onSnapshot(collection(db, "onlineUsers"), (snap) => {
     box.innerHTML = "";
 
     snap.forEach(d => {
       const u = d.data();
+      if (!u) return;
 
       const isOnline = Date.now() - (u.lastActive || 0) < 60000;
 
@@ -100,7 +105,6 @@ function loadUsers() {
             <div class="dot ${isOnline ? "online" : "offline"}"></div>
             <span>${u.username || "user"}</span>
           </div>
-
           ${isOnline ? "<span class='badge'>LIVE</span>" : ""}
         </div>
       `;
@@ -108,37 +112,38 @@ function loadUsers() {
   });
 }
 
-/* ================= FEED (FIXED FULL VERSION) ================= */
+/* ================= FIXED CHAT ================= */
 function loadFeed() {
   const q = query(collection(db, "posts"), orderBy("time"));
 
   onSnapshot(q, (snap) => {
     const box = document.getElementById("chatBox");
-
     if (!box) return;
 
     box.innerHTML = "";
 
-    let validPosts = 0;
+    let count = 0;
 
     snap.forEach(docSnap => {
       const m = docSnap.data();
-
       if (!m) return;
-      if (!m.text || m.text.trim() === "") return;
+
+      const text = (m.text || "").trim();
+      if (!text) return;
+
       if (m.visibility === "private") return;
 
-      validPosts++;
+      count++;
 
       box.innerHTML += `
         <div style="margin:6px 0;">
           <b style="color:#5bc0be;">${m.user || "user"}</b>
-          <div>${m.text}</div>
+          <div>${text}</div>
         </div>
       `;
     });
 
-    if (validPosts === 0) {
+    if (count === 0) {
       box.innerHTML = "<p style='opacity:0.6;'>No messages yet...</p>";
     }
 
@@ -146,11 +151,12 @@ function loadFeed() {
   });
 }
 
-/* ================= SEND ================= */
+/* ================= SEND MESSAGE ================= */
 window.sendMessage = async () => {
   const input = document.getElementById("chatInput");
-  const text = input.value.trim();
+  if (!input) return;
 
+  const text = input.value.trim();
   if (!text) return;
 
   const name = await getUsername();
@@ -172,8 +178,11 @@ function loadWallet() {
 
     const data = snap.data();
 
-    document.getElementById("walletBalance").innerText = data.balance || 0;
-    document.getElementById("walletUpdated").innerText =
+    const bal = document.getElementById("walletBalance");
+    const upd = document.getElementById("walletUpdated");
+
+    if (bal) bal.innerText = data.balance || 0;
+    if (upd) upd.innerText =
       data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : "-";
   });
 }
@@ -181,6 +190,7 @@ function loadWallet() {
 /* ================= CRYPTO ================= */
 async function loadCryptoPrices() {
   const el = document.getElementById("btcPrice");
+  if (!el) return;
 
   try {
     const res = await fetch(
@@ -226,17 +236,25 @@ window.goPremium = handleUpgrade;
 /* ================= NAV ================= */
 window.toggleMenu = () => {
   const m = document.getElementById("menu");
+  if (!m) return;
   m.style.display = m.style.display === "block" ? "none" : "block";
 };
 
 window.goProfile = () => location.href = "profile.html";
 window.goHome = () => location.reload();
 
-/* ================= ADMIN ================= */
+/* ================= ADMIN FIX (FINAL) ================= */
 window.goAdmin = async () => {
   const snap = await getDoc(doc(db, "users", user.uid));
 
-  if (snap.exists() && snap.data().role === "admin") {
+  if (!snap.exists()) {
+    alert("❌ No user profile found");
+    return;
+  }
+
+  const role = snap.data().role;
+
+  if (role === "admin") {
     location.href = "admin.html";
   } else {
     alert("❌ Admin locked");
