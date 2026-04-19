@@ -1,4 +1,5 @@
 import { auth, db } from "./firebase.js";
+import { isAllowed, isPremiumAllowed } from "./engine.js";
 
 import {
   onAuthStateChanged,
@@ -32,6 +33,9 @@ onAuthStateChanged(auth, async (u) => {
   await ensureUser();
   await loadUser();
 
+  // 🔒 LOCK UI AFTER USER LOAD
+  applyUIRestrictions();
+
   loadUsers();
   loadFeed();
 });
@@ -54,6 +58,35 @@ async function ensureUser() {
 async function loadUser() {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (snap.exists()) userData = snap.data();
+}
+
+/* ================= 🔒 UI LOCK SYSTEM ================= */
+function applyUIRestrictions() {
+  if (!userData) return;
+
+  // PREMIUM-ONLY BUTTONS
+  const premiumButtons = document.querySelectorAll(".premium-only");
+
+  if (!isPremiumAllowed(userData)) {
+    premiumButtons.forEach(btn => {
+      btn.style.display = "none";
+    });
+  }
+
+  // ADS SECTION CONTROL
+  const adsSection = document.querySelectorAll(".ads-only");
+
+  if (!isAllowed("ads", userData)) {
+    adsSection.forEach(el => {
+      el.style.display = "none";
+    });
+  }
+
+  // OPTIONAL: ENGINE FEATURE LOCKS
+  if (!isAllowed("chat", userData)) {
+    const chatBox = document.getElementById("chatBox");
+    if (chatBox) chatBox.innerHTML = "<p>Chat disabled</p>";
+  }
 }
 
 /* ================= USERS ================= */
@@ -115,6 +148,12 @@ window.sendMessage = async function () {
 
   if (!text) return;
 
+  // 🔒 OPTIONAL LIMIT CHECK (future upgrade hook)
+  if (!isAllowed("chat", userData)) {
+    alert("Chat disabled for your account");
+    return;
+  }
+
   await addDoc(collection(db, "posts"), {
     text,
     user: user.email.split("@")[0],
@@ -126,20 +165,13 @@ window.sendMessage = async function () {
 
 /* ================= MENU ================= */
 window.toggleMenu = function () {
-  const menu = document.getElementById("menu");
-  if (!menu) return;
-
-  menu.classList.toggle("active");
+  document.getElementById("menu").classList.toggle("active");
 };
 
 /* ================= LOGOUT ================= */
 window.logout = async function () {
-  try {
-    await signOut(auth);
-    location.href = "index.html";
-  } catch (err) {
-    console.error("Logout error:", err);
-  }
+  await signOut(auth);
+  location.href = "index.html";
 };
 
 /* ================= NAVIGATION ================= */
@@ -148,8 +180,6 @@ window.goProfile = () => location.href = "profile.html";
 window.goAdmin = () => location.href = "admin.html";
 window.goPremium = () => location.href = "premium.html";
 window.support = () => alert("Support coming soon");
-
-/* ================= FIXED MISSING BUTTONS ================= */
 window.goFaq = () => location.href = "faq.html";
 window.goAbout = () => location.href = "about.html";
 window.goBlog = () => location.href = "blog/index.html";
