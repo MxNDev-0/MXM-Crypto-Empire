@@ -46,8 +46,9 @@ input {
 }
 
 /* ================= BUTTONS ================= */
+/* FIX: prevent conflict with ui-theme.css */
 button {
-  width: 100%;
+  width: auto;
   display: block;
   margin: 8px 0;
   padding: 12px;
@@ -75,7 +76,7 @@ button {
   font-size: 13px;
 }
 
-/* ================= MENU (FIXED ONLY) ================= */
+/* ================= MENU ================= */
 .menu {
   display: none;
   position: absolute;
@@ -85,7 +86,7 @@ button {
   padding: 10px;
   border-radius: 10px;
   width: 160px;
-  z-index: 999;
+  z-index: 9999;
 }
 
 .menu.active {
@@ -124,6 +125,7 @@ button {
 }
 
 .row button {
+  width: auto;
   padding: 6px 10px;
   border-radius: 5px;
   background: #5bc0be;
@@ -166,7 +168,7 @@ button {
   color: black;
 }
 
-/* ================= EARN CARD (RESTORED) ================= */
+/* ================= EARN CARD ================= */
 .earn-card {
   border: 1px solid #5bc0be;
   box-shadow: 0 0 8px rgba(91, 192, 190, 0.2);
