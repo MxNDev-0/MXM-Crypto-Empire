@@ -36,7 +36,7 @@ onAuthStateChanged(auth, async (u) => {
   loadCryptoPrices();
 });
 
-/* ================= USER PROFILE (FIXED - NO OVERWRITE ROLE) ================= */
+/* ================= USER PROFILE ================= */
 async function ensureUserProfile() {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
@@ -47,16 +47,12 @@ async function ensureUserProfile() {
     await setDoc(ref, {
       email: user.email,
       username: defaultUsername,
-
-      // 👇 ONLY SET ON FIRST CREATE
       role: "user",
-
       createdAt: Date.now()
     });
   } else {
     const data = snap.data();
 
-    // ❌ IMPORTANT FIX: NEVER TOUCH ROLE AGAIN
     await setDoc(ref, {
       username: data.username || defaultUsername
     }, { merge: true });
@@ -75,7 +71,7 @@ async function getUsername() {
   return user.email.split("@")[0];
 }
 
-/* ================= ONLINE ================= */
+/* ================= ONLINE USERS ================= */
 async function registerOnline() {
   const name = await getUsername();
 
@@ -86,7 +82,7 @@ async function registerOnline() {
   });
 }
 
-/* ================= USERS ================= */
+/* ================= USERS LIST ================= */
 function loadUsers() {
   const box = document.getElementById("onlineUsers");
   if (!box) return;
@@ -111,14 +107,14 @@ function loadUsers() {
   });
 }
 
-/* ================= FEED (FIXED CHAT RENDER) ================= */
+/* ================= FEED (FIXED CHAT SAFE VERSION) ================= */
 function loadFeed() {
-  const q = query(collection(db, "posts"), orderBy("time"));
+  const box = document.getElementById("chatBox");
+  if (!box) return;
+
+  const q = query(collection(db, "posts"));
 
   onSnapshot(q, (snap) => {
-    const box = document.getElementById("chatBox");
-    if (!box) return;
-
     box.innerHTML = "";
 
     let count = 0;
@@ -126,7 +122,8 @@ function loadFeed() {
     snap.forEach(docSnap => {
       const m = docSnap.data();
 
-      if (!m || !m.text) return;
+      if (!m) return;
+      if (!m.text) return;
       if (m.visibility === "private") return;
 
       count++;
@@ -144,10 +141,13 @@ function loadFeed() {
     }
 
     box.scrollTop = box.scrollHeight;
+  }, (error) => {
+    console.error("Feed error:", error);
+    box.innerHTML = "<p style='color:red;'>Chat failed to load</p>";
   });
 }
 
-/* ================= SEND ================= */
+/* ================= SEND MESSAGE ================= */
 window.sendMessage = async () => {
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
@@ -233,7 +233,7 @@ window.toggleMenu = () => {
 window.goProfile = () => location.href = "profile.html";
 window.goHome = () => location.reload();
 
-/* ================= ADMIN FIX (IMPORTANT OVERRIDE) ================= */
+/* ================= ADMIN ================= */
 window.goAdmin = async () => {
   const snap = await getDoc(doc(db, "users", user.uid));
 
@@ -244,13 +244,7 @@ window.goAdmin = async () => {
 
   const data = snap.data();
 
-  // 🔥 OWNER OVERRIDE (YOU CAN EDIT THIS)
-  const isOwner =
-    user.email === "mxndev0@gmail.com" ||
-    user.email.includes("mxn") ||
-    user.uid === "MXN_OWNER";
-
-  if (data.role === "admin" || isOwner) {
+  if (data.role === "admin") {
     location.href = "admin.html";
   } else {
     alert("❌ Admin locked");
