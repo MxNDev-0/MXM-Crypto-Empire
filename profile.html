@@ -15,200 +15,151 @@
       color: #fff;
     }
 
-    /* ================= HEADER ================= */
-    .navbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 12px;
-      background: #1c2541;
-      position: sticky;
-      top: 0;
-    }
-
-    .navbar h3 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .icon-btn {
-      background: #5bc0be;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    /* ================= CONTAINER ================= */
     .container {
       padding: 15px;
       position: relative;
     }
 
-    /* ================= MENU ================= */
+    /* HEADER BAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: #1c2541;
+    }
+
+    .menu-btn {
+      background: #5bc0be;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .back-btn {
+      background: transparent;
+      border: 1px solid #5bc0be;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* DROPDOWN MENU */
     .dropdown {
       position: absolute;
-      top: 45px;
-      right: 10px;
+      top: 55px;
+      left: 10px;
       background: #1c2541;
       border-radius: 10px;
       padding: 10px;
       display: none;
       width: 200px;
-      z-index: 10;
+      z-index: 1000;
     }
 
     .dropdown input {
       margin-bottom: 6px;
       width: 100%;
       padding: 6px;
-      border-radius: 6px;
-      border: none;
     }
 
     .dropdown button {
       width: 100%;
       margin-top: 5px;
       padding: 6px;
-      font-size: 12px;
     }
 
-    /* ================= USERNAME ================= */
     .username-box {
       text-align: center;
-      margin: 12px 0;
+      margin: 15px 0;
       font-size: 16px;
       color: #5bc0be;
     }
 
-    /* ================= POST BOX ================= */
-    #postInput {
-      width: 100%;
-      min-height: 120px;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      resize: none;
-      font-size: 14px;
-      background: #0b132b;
-      color: white;
-      box-shadow: inset 0 0 0 1px #1c2541;
-    }
-
-    .card {
-      background: #1c2541;
-      padding: 12px;
-      border-radius: 12px;
-      margin-top: 12px;
-    }
-
-    /* ================= POSTS ================= */
+    /* POSTS */
     .post {
+      background: #1c2541;
       padding: 10px;
       border-radius: 10px;
-      background: #0b132b;
       margin-bottom: 10px;
       position: relative;
     }
 
-    /* AVATAR (UI ONLY) */
-    .avatar {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      background: #5bc0be;
-      display: inline-block;
-      margin-right: 8px;
-      vertical-align: middle;
-    }
-
-    .post-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    /* ================= 3 DOT MENU ================= */
-    .dot-menu {
+    /* 3 DOT MENU */
+    .dots {
       position: absolute;
-      right: 8px;
-      top: 8px;
+      right: 10px;
+      top: 10px;
       cursor: pointer;
       font-size: 18px;
-      padding: 2px 6px;
     }
 
-    .visibility-menu {
+    .post-menu {
       position: absolute;
-      right: 8px;
-      top: 28px;
-      background: #1c2541;
+      right: 10px;
+      top: 30px;
+      background: #0b132b;
+      border: 1px solid #5bc0be;
       border-radius: 8px;
       display: none;
       flex-direction: column;
-      overflow: hidden;
-      z-index: 5;
+      z-index: 10;
     }
 
-    .visibility-menu button {
+    .post-menu button {
       background: none;
       border: none;
-      color: white;
-      padding: 8px 10px;
+      color: #fff;
+      padding: 8px;
       text-align: left;
-      font-size: 12px;
-      cursor: pointer;
+      width: 120px;
     }
 
-    .visibility-menu button:hover {
+    .post-menu button:hover {
+      background: #1c2541;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       background: #5bc0be;
       color: #000;
-    }
-
-    /* TAG */
-    .tag-private {
-      font-size: 10px;
-      background: #ef4444;
-      padding: 2px 6px;
-      border-radius: 10px;
-    }
-
-    .tag-public {
-      font-size: 10px;
-      background: #22c55e;
-      padding: 2px 6px;
-      border-radius: 10px;
-    }
-
-    .small-nav-btn {
-      margin-top: 10px;
-      padding: 6px 10px;
-      font-size: 12px;
+      padding: 10px 15px;
       border-radius: 8px;
-      background: #5bc0be;
-      border: none;
+      display: none;
     }
+
+    textarea {
+      width: 100%;
+      height: 90px;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      resize: none;
+    }
+
   </style>
 </head>
 
 <body>
 
-<!-- ================= HEADER ================= -->
-<div class="navbar">
+<!-- TOP BAR -->
+<div class="topbar">
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
 
-  <button class="icon-btn" onclick="toggleMenu()">☰</button>
+  <h3 style="margin:0;">Profile 👤</h3>
 
-  <h3>Profile 👤</h3>
-
-  <button class="icon-btn" onclick="location.href='dashboard.html'">⬅</button>
-
+  <button class="back-btn" onclick="location.href='dashboard.html'">⬅</button>
 </div>
 
 <div class="container">
 
-  <!-- DROPDOWN MENU -->
+  <!-- DROPDOWN -->
   <div id="dropdownMenu" class="dropdown">
     <input id="usernameInput" placeholder="New username">
     <button onclick="updateUsername()">Save Username</button>
@@ -220,21 +171,13 @@
     Username: <span id="usernameDisplay">Loading...</span>
   </div>
 
-  <!-- BACK BUTTON (kept but now optional UI backup) -->
-  <button class="small-nav-btn" onclick="location.href='dashboard.html'">
-    ⬅ Back
-  </button>
-
-  <!-- CREATE POST -->
+  <!-- POST BOX -->
   <div class="card">
     <h4>Create Post</h4>
-
     <textarea id="postInput" placeholder="Write something..."></textarea>
 
     <div style="display:flex;justify-content:flex-end;margin-top:10px;">
-      <button onclick="createPost()" style="padding:6px 10px;border-radius:8px;">
-        Post
-      </button>
+      <button onclick="createPost()" style="width:auto;">Post</button>
     </div>
   </div>
 
@@ -246,6 +189,10 @@
 
 </div>
 
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
 <script type="module" src="profile.js"></script>
+
 </body>
 </html>
