@@ -20,7 +20,7 @@
       text-align: center;
       position: sticky;
       top: 0;
-      z-index: 1000; /* ✅ FIX: stays above content */
+      z-index: 1000;
     }
 
     .header h2 {
@@ -32,7 +32,7 @@
       padding: 15px;
       max-width: 900px;
       margin: auto;
-      margin-top: 10px; /* ✅ FIX: prevents overlap under header */
+      margin-top: 10px;
     }
 
     .card {
@@ -87,32 +87,26 @@
       margin: 10px 0;
     }
 
-    /* ✅ BACK BUTTON (unchanged position, but layered safely) */
+    /* ✅ FIXED BACK BUTTON (secondary style, not floating) */
     .back {
-      position: fixed;
-      bottom: 18px;
-      right: 18px;
-      z-index: 900; /* ✅ stays below header but above content */
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
 
-      background: rgba(91, 192, 190, 0.15);
+      background: transparent;
       color: #5bc0be;
 
       border: 1px solid #5bc0be;
-      padding: 6px 10px;
-
-      font-size: 12px;
       border-radius: 8px;
 
+      font-size: 13px;
       cursor: pointer;
 
       transition: 0.2s ease;
-      backdrop-filter: blur(6px);
     }
 
     .back:hover {
-      background: #5bc0be;
-      color: #000;
-      transform: scale(1.05);
+      background: rgba(91, 192, 190, 0.1);
     }
   </style>
 </head>
@@ -163,6 +157,11 @@
     </select>
 
     <button onclick="buyAd()">Proceed to Payment 🚀</button>
+
+    <!-- ✅ MOVED HERE -->
+    <button class="back" onclick="location.href='dashboard.html'">
+      ← Back
+    </button>
   </div>
 
   <div class="card">
@@ -178,8 +177,6 @@
   </div>
 
 </div>
-
-<button class="back" onclick="location.href='dashboard.html'">← Back</button>
 
 <script type="module">
 import { auth } from "./firebase.js";
