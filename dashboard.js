@@ -22,7 +22,10 @@ let userData = null;
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth, async (u) => {
-  if (!u) location.href = "index.html";
+  if (!u) {
+    location.href = "index.html";
+    return;
+  }
 
   user = u;
 
@@ -73,7 +76,7 @@ function loadUsers() {
   });
 }
 
-/* ================= FEED (FIXED SAFETY) ================= */
+/* ================= FEED ================= */
 function loadFeed() {
   const box = document.getElementById("chatBox");
   if (!box) return;
@@ -82,6 +85,11 @@ function loadFeed() {
 
   onSnapshot(q, (snap) => {
     box.innerHTML = "";
+
+    if (snap.empty) {
+      box.innerHTML = "<p style='opacity:0.6;'>No posts yet...</p>";
+      return;
+    }
 
     snap.forEach(docSnap => {
       const m = docSnap.data();
@@ -95,6 +103,8 @@ function loadFeed() {
         </div>
       `;
     });
+
+    box.scrollTop = box.scrollHeight;
   });
 }
 
@@ -116,23 +126,30 @@ window.sendMessage = async function () {
 
 /* ================= MENU ================= */
 window.toggleMenu = function () {
-  document.getElementById("menu").classList.toggle("active");
+  const menu = document.getElementById("menu");
+  if (!menu) return;
+
+  menu.classList.toggle("active");
 };
 
 /* ================= LOGOUT ================= */
 window.logout = async function () {
-  await signOut(auth);
-  location.href = "index.html";
+  try {
+    await signOut(auth);
+    location.href = "index.html";
+  } catch (err) {
+    console.error("Logout error:", err);
+  }
 };
 
-/* ================= NAVIGATION FIX (MISSING BUTTONS FIXED) ================= */
+/* ================= NAVIGATION ================= */
 window.goHome = () => location.href = "dashboard.html";
 window.goProfile = () => location.href = "profile.html";
 window.goAdmin = () => location.href = "admin.html";
 window.goPremium = () => location.href = "premium.html";
 window.support = () => alert("Support coming soon");
 
-/* 🔥 ADDED MISSING BUTTON FUNCTIONS */
+/* ================= FIXED MISSING BUTTONS ================= */
 window.goFaq = () => location.href = "faq.html";
 window.goAbout = () => location.href = "about.html";
 window.goBlog = () => location.href = "blog/index.html";
