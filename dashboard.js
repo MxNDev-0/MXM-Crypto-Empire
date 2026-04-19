@@ -36,45 +36,46 @@ onAuthStateChanged(auth, async (u) => {
   loadCryptoPrices();
 });
 
-/* ================= OWNER FIX (CRITICAL) ================= */
+/* ================= USER PROFILE (FIXED - NO OVERWRITE ROLE) ================= */
 async function ensureUserProfile() {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
 
   const defaultUsername = user.email.split("@")[0];
 
-  const isOwner =
-    user.email.includes("mxn") ||
-    user.email === "admin@admin.com";
-
   if (!snap.exists()) {
     await setDoc(ref, {
       email: user.email,
       username: defaultUsername,
-      role: isOwner ? "admin" : "user",
+
+      // 👇 ONLY SET ON FIRST CREATE
+      role: "user",
+
       createdAt: Date.now()
     });
   } else {
     const data = snap.data();
 
+    // ❌ IMPORTANT FIX: NEVER TOUCH ROLE AGAIN
     await setDoc(ref, {
-      username: data.username || defaultUsername,
-      role: isOwner ? "admin" : (data.role || "user")
+      username: data.username || defaultUsername
     }, { merge: true });
   }
 }
 
-/* ================= GET USERNAME ================= */
+/* ================= USERNAME ================= */
 async function getUsername() {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
 
-  if (!snap.exists()) return user.email.split("@")[0];
+  if (snap.exists()) {
+    return snap.data().username || user.email.split("@")[0];
+  }
 
-  return snap.data().username || user.email.split("@")[0];
+  return user.email.split("@")[0];
 }
 
-/* ================= ONLINE USERS ================= */
+/* ================= ONLINE ================= */
 async function registerOnline() {
   const name = await getUsername();
 
@@ -95,8 +96,6 @@ function loadUsers() {
 
     snap.forEach(d => {
       const u = d.data();
-      if (!u) return;
-
       const isOnline = Date.now() - (u.lastActive || 0) < 60000;
 
       box.innerHTML += `
@@ -112,7 +111,7 @@ function loadUsers() {
   });
 }
 
-/* ================= FIXED CHAT ================= */
+/* ================= FEED (FIXED CHAT RENDER) ================= */
 function loadFeed() {
   const q = query(collection(db, "posts"), orderBy("time"));
 
@@ -126,11 +125,8 @@ function loadFeed() {
 
     snap.forEach(docSnap => {
       const m = docSnap.data();
-      if (!m) return;
 
-      const text = (m.text || "").trim();
-      if (!text) return;
-
+      if (!m || !m.text) return;
       if (m.visibility === "private") return;
 
       count++;
@@ -138,7 +134,7 @@ function loadFeed() {
       box.innerHTML += `
         <div style="margin:6px 0;">
           <b style="color:#5bc0be;">${m.user || "user"}</b>
-          <div>${text}</div>
+          <div>${m.text}</div>
         </div>
       `;
     });
@@ -151,12 +147,11 @@ function loadFeed() {
   });
 }
 
-/* ================= SEND MESSAGE ================= */
+/* ================= SEND ================= */
 window.sendMessage = async () => {
   const input = document.getElementById("chatInput");
-  if (!input) return;
-
   const text = input.value.trim();
+
   if (!text) return;
 
   const name = await getUsername();
@@ -178,11 +173,8 @@ function loadWallet() {
 
     const data = snap.data();
 
-    const bal = document.getElementById("walletBalance");
-    const upd = document.getElementById("walletUpdated");
-
-    if (bal) bal.innerText = data.balance || 0;
-    if (upd) upd.innerText =
+    document.getElementById("walletBalance").innerText = data.balance || 0;
+    document.getElementById("walletUpdated").innerText =
       data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : "-";
   });
 }
@@ -190,7 +182,6 @@ function loadWallet() {
 /* ================= CRYPTO ================= */
 async function loadCryptoPrices() {
   const el = document.getElementById("btcPrice");
-  if (!el) return;
 
   try {
     const res = await fetch(
@@ -236,14 +227,13 @@ window.goPremium = handleUpgrade;
 /* ================= NAV ================= */
 window.toggleMenu = () => {
   const m = document.getElementById("menu");
-  if (!m) return;
   m.style.display = m.style.display === "block" ? "none" : "block";
 };
 
 window.goProfile = () => location.href = "profile.html";
 window.goHome = () => location.reload();
 
-/* ================= ADMIN FIX (FINAL) ================= */
+/* ================= ADMIN FIX (IMPORTANT OVERRIDE) ================= */
 window.goAdmin = async () => {
   const snap = await getDoc(doc(db, "users", user.uid));
 
@@ -252,9 +242,15 @@ window.goAdmin = async () => {
     return;
   }
 
-  const role = snap.data().role;
+  const data = snap.data();
 
-  if (role === "admin") {
+  // 🔥 OWNER OVERRIDE (YOU CAN EDIT THIS)
+  const isOwner =
+    user.email === "mxndev0@gmail.com" ||
+    user.email.includes("mxn") ||
+    user.uid === "MXN_OWNER";
+
+  if (data.role === "admin" || isOwner) {
     location.href = "admin.html";
   } else {
     alert("❌ Admin locked");
