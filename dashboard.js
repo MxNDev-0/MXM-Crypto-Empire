@@ -22,71 +22,35 @@ let userData = null;
 
 /* ================= AUTH ================= */
 onAuthStateChanged(auth, async (u) => {
-  if (!u) {
-    location.href = "index.html";
-    return;
-  }
+  if (!u) location.href = "index.html";
 
   user = u;
 
-  await ensureUserProfile();
-  await loadUserData();
-
-  if (!userData) {
-    console.error("User data not loaded");
-    return;
-  }
-
-  await registerOnline();
+  await ensureUser();
+  await loadUser();
 
   loadUsers();
   loadFeed();
-  loadWallet();
-  loadCryptoPrices();
-
-  setupDebugAccess();
 });
 
-/* ================= USER PROFILE ================= */
-async function ensureUserProfile() {
+/* ================= USER ================= */
+async function ensureUser() {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
-
-  const defaultUsername = user.email.split("@")[0];
 
   if (!snap.exists()) {
     await setDoc(ref, {
       email: user.email,
-      username: defaultUsername,
+      username: user.email.split("@")[0],
       role: "user",
-      isPremium: false,
-      createdAt: Date.now()
+      isPremium: false
     });
   }
 }
 
-/* ================= LOAD USER DATA ================= */
-async function loadUserData() {
+async function loadUser() {
   const snap = await getDoc(doc(db, "users", user.uid));
-  if (snap.exists()) {
-    userData = snap.data();
-  }
-}
-
-/* ================= USERNAME ================= */
-async function getUsername() {
-  return userData?.username || user.email.split("@")[0];
-}
-
-/* ================= ONLINE ================= */
-async function registerOnline() {
-  const name = await getUsername();
-
-  await setDoc(doc(db, "onlineUsers", user.uid), {
-    uid: user.uid,
-    username: name,
-    lastActive: Date.now()
-  }, { merge: true });
+  if (snap.exists()) userData = snap.data();
 }
 
 /* ================= USERS ================= */
@@ -99,15 +63,10 @@ function loadUsers() {
 
     snap.forEach(d => {
       const u = d.data();
-      const isOnline = Date.now() - (u.lastActive || 0) < 60000;
 
       box.innerHTML += `
         <div class="user-item">
-          <div class="user-left">
-            <div class="dot ${isOnline ? "online" : "offline"}"></div>
-            <span>${u.username || "user"}</span>
-          </div>
-          ${isOnline ? "<span class='badge'>LIVE</span>" : ""}
+          <span>${u.username || "user"}</span>
         </div>
       `;
     });
@@ -119,115 +78,57 @@ function loadFeed() {
   const box = document.getElementById("chatBox");
   if (!box) return;
 
-  const q = query(
-    collection(db, "posts"),
-    orderBy("time", "desc")
-  );
+  const q = query(collection(db, "posts"), orderBy("time", "desc"));
 
   onSnapshot(q, (snap) => {
-    console.log("Feed docs:", snap.size);
-
     box.innerHTML = "";
 
-    if (snap.empty) {
-      box.innerHTML = "<p style='opacity:0.6;'>No messages yet...</p>";
-      return;
-    }
+    snap.forEach(doc => {
+      const m = doc.data();
 
-    let count = 0;
-
-    snap.forEach(docSnap => {
-      const m = docSnap.data();
-
-      if (!m || !m.text || !m.time) return;
-
-      const visibility = m.visibility || "public";
-
-      if (visibility === "admin-only" && userData?.role !== "admin") return;
-      if (visibility === "premium" && !userData?.isPremium) return;
-
-      count++;
+      if (!m.text) return;
 
       box.innerHTML += `
-        <div style="margin:8px 0; padding:8px; background:#0b132b; border-radius:6px;">
-          <b style="color:#5bc0be;">${m.user || "user"}</b>
-          <div>${m.text}</div>
+        <div class="msg">
+          <b>${m.user}</b><br/>
+          ${m.text}
         </div>
       `;
     });
-
-    if (count === 0) {
-      box.innerHTML = "<p style='opacity:0.6;'>No visible messages</p>";
-    }
-
-    box.scrollTop = box.scrollHeight;
-  }, (err) => {
-    console.error("Feed error:", err);
-    box.innerHTML = "<p style='color:red;'>Failed to load chat</p>";
   });
 }
 
-/* ================= SEND MESSAGE ================= */
-window.sendMessage = async () => {
+/* ================= SEND ================= */
+window.sendMessage = async function () {
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
 
   if (!text) return;
 
-  const name = await getUsername();
-
   await addDoc(collection(db, "posts"), {
     text,
-    user: name,
-    visibility: "public",
+    user: user.email.split("@")[0],
     time: serverTimestamp()
   });
 
   input.value = "";
 };
 
-/* ================= DEBUG SYSTEM ================= */
-function setupDebugAccess() {
-  const btn = document.getElementById("debugBtn");
-  if (!btn) return;
-
-  if (userData?.role === "admin" || userData?.isPremium) {
-    btn.style.display = "block";
-
-    btn.onclick = async () => {
-      console.clear();
-      console.log("🛠 MCN Debug Start");
-
-      console.log("User:", user.email);
-      console.log("Role:", userData?.role);
-      console.log("Premium:", userData?.isPremium);
-
-      const snap = await getDoc(doc(db, "users", user.uid));
-      console.log("User Data:", snap.data());
-
-      console.log("Project:", db.app.options.projectId);
-
-      console.log("✅ Debug Complete");
-    };
-  }
-}
-
 /* ================= MENU ================= */
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("menuBtn");
+window.toggleMenu = function () {
   const menu = document.getElementById("menu");
+  menu.classList.toggle("active");
+};
 
-  if (btn && menu) {
-    btn.addEventListener("click", () => {
-      menu.classList.toggle("active");
-    });
-  }
+/* ================= LOGOUT ================= */
+window.logout = async function () {
+  await signOut(auth);
+  location.href = "index.html";
+};
 
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      location.href = "index.html";
-    });
-  }
-});
+/* ================= NAV ================= */
+window.goHome = () => location.href = "dashboard.html";
+window.goProfile = () => location.href = "profile.html";
+window.goAdmin = () => location.href = "admin.html";
+window.goPremium = () => location.href = "premium.html";
+window.support = () => alert("Support coming soon");
