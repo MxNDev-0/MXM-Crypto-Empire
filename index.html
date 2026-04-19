@@ -1,34 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>MCN Engine V15 — Monetization Control Network</title>
+  <title>MCN Engine V15 — Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="style.css">
 
   <style>
     body {
       background: #0b132b;
-      color: #fff;
-      font-family: Arial, sans-serif;
+      color: white;
       margin: 0;
+      font-family: Arial;
     }
 
     .login-wrapper {
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      height: 100vh;
       padding: 20px;
     }
 
     .center-box {
+      width: 100%;
+      max-width: 380px;
       background: #1c2541;
       padding: 25px;
       border-radius: 12px;
-      width: 100%;
-      max-width: 380px;
       text-align: center;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
     }
 
     .logo {
@@ -38,35 +38,15 @@
       margin-bottom: 10px;
     }
 
-    h2 {
-      margin: 10px 0;
-    }
-
-    .subtext {
-      opacity: 0.7;
-      font-size: 14px;
-      margin-bottom: 15px;
-    }
-
-    .benefits {
-      text-align: left;
-      font-size: 13px;
-      margin-bottom: 15px;
-      line-height: 1.6;
-      background: #0b132b;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
     input {
       width: 100%;
       padding: 10px;
       margin: 6px 0;
       border-radius: 8px;
       border: none;
-      outline: none;
       background: #0b132b;
       color: white;
+      box-sizing: border-box;
     }
 
     button {
@@ -74,23 +54,30 @@
       padding: 10px;
       margin-top: 8px;
       border-radius: 8px;
+      border: none;
       background: #5bc0be;
-      color: #000;
+      color: black;
       font-weight: bold;
       cursor: pointer;
-      border: none;
     }
 
-    .secondary-btn {
+    .secondary {
       background: transparent;
       border: 1px solid #5bc0be;
       color: #5bc0be;
     }
 
-    .footer-note {
+    .info {
+      font-size: 13px;
+      opacity: 0.8;
+      margin: 10px 0;
+      line-height: 1.4;
+    }
+
+    #message {
       font-size: 12px;
-      opacity: 0.6;
       margin-top: 10px;
+      opacity: 0.8;
     }
   </style>
 </head>
@@ -102,34 +89,27 @@
   <div class="center-box">
 
     <div class="logo">MCN</div>
-
     <h2>MCN Engine V15</h2>
-    <p class="subtext">Monetization Control Network</p>
 
-    <!-- 🔥 VALUE SECTION -->
-    <div class="benefits">
-      💰 Earn from tasks, referrals & content<br>
-      💬 Access real-time community feed<br>
-      🚀 Unlock premium earning tools<br>
-      🛠 Built-in monetization system
+    <div class="info">
+      💰 Earn from ads & content<br>
+      📢 Buy ad space & promote business<br>
+      💬 Join community feed system
     </div>
 
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
 
     <button onclick="signup()">Create Account</button>
-    <button class="secondary-btn" onclick="login()">Login</button>
+    <button class="secondary" onclick="login()">Login</button>
 
     <p id="message"></p>
-
-    <div class="footer-note">
-      Powered by MCN Engine • Build. Earn. Scale.
-    </div>
 
   </div>
 
 </div>
 
 <script type="module" src="app.js"></script>
+
 </body>
 </html>
