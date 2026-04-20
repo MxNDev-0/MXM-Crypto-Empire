@@ -59,7 +59,6 @@ function loadMessages() {
 /* ================= SEND ================= */
 window.sendMsg = async function () {
   const input = document.getElementById("msgInput");
-
   const text = input.value.trim();
   if (!text) return;
 
@@ -69,6 +68,13 @@ window.sendMsg = async function () {
     text,
     sender: me.uid,
     time: serverTimestamp()
+  });
+
+  /* 🔔 notification */
+  await addDoc(collection(db, "notifications", otherUid, "items"), {
+    text: "New message received",
+    seen: false,
+    createdAt: serverTimestamp()
   });
 
   input.value = "";
