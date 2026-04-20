@@ -14,8 +14,7 @@ import {
   doc,
   getDoc,
   setDoc,
-  serverTimestamp,
-  runTransaction
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const API = "https://mxm-backend.onrender.com";
@@ -40,7 +39,6 @@ onAuthStateChanged(auth, async (u) => {
 
   loadUsers();
   loadChatV9();
-  setupPresence();
 });
 
 /* ================= USER ================= */
@@ -67,87 +65,39 @@ function loadUsers() {
   const box = document.getElementById("onlineUsers");
   if (!box) return;
 
-  onSnapshot(collection(db, "presence"), (snap) => {
+  onSnapshot(collection(db, "onlineUsers"), (snap) => {
     box.innerHTML = "";
 
     snap.forEach(d => {
       const u = d.data();
-      if (!u.online) return;
-
-      box.innerHTML += `
-        <div class="user-item">
-          🟢 ${u.username || "user"}
-        </div>
-      `;
+      box.innerHTML += `<div class="user-item">🟢 ${u.username || "user"}</div>`;
     });
   });
 }
 
-/* ================= CHAT V9 CORE ================= */
-let chatUnsub = null;
-
+/* ================= CHAT ================= */
 function loadChatV9() {
   const box = document.getElementById("chatBox");
   if (!box) return;
 
-  if (chatUnsub) chatUnsub();
-
   const q = query(collection(db, "posts"), orderBy("time", "asc"));
 
-  chatUnsub = onSnapshot(q, (snap) => {
+  onSnapshot(q, (snap) => {
     let html = "";
-    let lastUser = null;
 
     snap.forEach(d => {
       const m = d.data();
-      if (!m) return;
-
-      const text = m.text || "";
-      const userName = m.user || "unknown";
-
-      const time = m.time?.toDate
-        ? m.time.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-        : "";
-
-      const isMe = userName === user.email.split("@")[0];
-      const grouped = lastUser === userName;
-      lastUser = userName;
+      const time = m.time?.toDate?.().toLocaleTimeString() || "";
 
       html += `
-        <div style="
-          display:flex;
-          flex-direction:column;
-          align-items:${isMe ? "flex-end" : "flex-start"};
-          margin:${grouped ? "2px 0" : "10px 0"};
-        ">
-          
-          ${!grouped ? `
-            <div style="font-size:11px;opacity:0.6;margin-bottom:3px;">
-              ${userName}
-            </div>
-          ` : ""}
-
-          <div style="
-            max-width:75%;
-            padding:8px 10px;
-            border-radius:14px;
-            background:${isMe ? "#5bc0be" : "#1c2541"};
-            color:${isMe ? "#000" : "#fff"};
-            font-size:13px;
-            word-break:break-word;
-          ">
-            ${text}
-          </div>
-
-          <div style="font-size:9px;opacity:0.4;margin-top:2px;">
-            ${time}
-          </div>
+        <div style="margin:6px 0;padding:6px;background:#1c2541;border-radius:6px;">
+          <b>${m.user}</b>: ${m.text}
+          <div style="font-size:10px;opacity:0.5;">${time}</div>
         </div>
       `;
     });
 
     box.innerHTML = html;
-    box.scrollTop = box.scrollHeight;
   });
 }
 
@@ -156,52 +106,27 @@ window.sendMessage = async function () {
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
 
-  if (!text || !user) return;
-
-  input.value = "";
+  if (!text) return;
 
   await addDoc(collection(db, "posts"), {
     text,
     user: user.email.split("@")[0],
     time: serverTimestamp()
   });
+
+  input.value = "";
 };
-
-/* ================= PRESENCE ================= */
-function setupPresence() {
-  if (!user) return;
-
-  const ref = doc(db, "presence", user.uid);
-
-  setDoc(ref, {
-    uid: user.uid,
-    username: user.email.split("@")[0],
-    online: true,
-    lastSeen: serverTimestamp()
-  });
-
-  window.addEventListener("beforeunload", async () => {
-    await setDoc(ref, {
-      uid: user.uid,
-      username: user.email.split("@")[0],
-      online: false,
-      lastSeen: serverTimestamp()
-    }, { merge: true });
-  });
-}
 
 /* ================= MENU ================= */
 window.toggleMenu = function () {
   document.getElementById("menu").classList.toggle("active");
 };
 
-/* ================= LOGOUT ================= */
 window.logout = async function () {
   await signOut(auth);
   location.href = "index.html";
 };
 
-/* ================= NAV ================= */
 window.goHome = () => location.href = "dashboard.html";
 window.goProfile = () => location.href = "profile.html";
 window.goAdSpace = () => location.href = "ads.html";
@@ -216,69 +141,44 @@ window.goAdmin = () => {
   location.href = "admin.html";
 };
 
-window.openDeveloper = () => {
-  alert("Developer tools coming soon");
-};
+/* ================= WALLET FX + CRYPTO (NEW) ================= */
 
-/* =========================================================
-   🔥 WALLET MARKET INJECTION (ADDED - DO NOT MODIFY CORE)
-========================================================= */
-
-async function loadWalletMarketData() {
+async function loadCurrency() {
   try {
+    const res = await fetch("https://api.exchangerate.host/latest?base=USD");
+    const data = await res.json();
 
-    const cryptoRes = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin&vs_currencies=usd"
-    );
+    const usd = Number(document.getElementById("walletBalance")?.innerText || 0);
 
-    const crypto = await cryptoRes.json();
+    document.getElementById("walletEUR").innerText =
+      (usd * data.rates.EUR).toFixed(2);
 
-    const btc = crypto?.bitcoin?.usd ?? 0;
-    const eth = crypto?.ethereum?.usd ?? 0;
-    const bnb = crypto?.binancecoin?.usd ?? 0;
+    document.getElementById("walletGBP").innerText =
+      (usd * data.rates.GBP).toFixed(2);
 
-    const fiatRes = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
-    const fiat = await fiatRes.json();
-
-    const ngn = fiat?.rates?.NGN ?? 0;
-    const eur = fiat?.rates?.EUR ?? 0;
-
-    const walletBox = document.getElementById("walletUpdated");
-    if (!walletBox) return;
-
-    let marketBox = document.getElementById("marketBox");
-
-    if (!marketBox) {
-      marketBox = document.createElement("div");
-      marketBox.id = "marketBox";
-
-      marketBox.style.marginTop = "10px";
-      marketBox.style.padding = "10px";
-      marketBox.style.background = "#0b132b";
-      marketBox.style.borderRadius = "8px";
-      marketBox.style.fontSize = "12px";
-      marketBox.style.border = "1px solid rgba(91,192,190,0.2)";
-
-      walletBox.parentNode.appendChild(marketBox);
-    }
-
-    marketBox.innerHTML = `
-      <b style="color:#5bc0be;">Market Overview</b><br><br>
-
-      ₿ BTC: $${btc.toLocaleString()}<br>
-      Ξ ETH: $${eth.toLocaleString()}<br>
-      🟡 BNB: $${bnb.toLocaleString()}<br>
-
-      <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:6px 0;">
-
-      💵 USD → NGN: ${ngn.toFixed(2)}<br>
-      💶 USD → EUR: ${eur.toFixed(2)}
-    `;
-
-  } catch (err) {
-    console.log("Market injection failed:", err);
-  }
+  } catch (e) {}
 }
 
-loadWalletMarketData();
-setInterval(loadWalletMarketData, 60000);
+async function loadCrypto() {
+  try {
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd"
+    );
+
+    const d = await res.json();
+
+    document.getElementById("cryptoPrices").innerHTML = `
+      🪙 BTC: $${d.bitcoin.usd}<br>
+      💎 ETH: $${d.ethereum.usd}<br>
+      💵 USDT: $${d.tether.usd}
+    `;
+  } catch (e) {}
+}
+
+setInterval(() => {
+  loadCurrency();
+  loadCrypto();
+}, 10000);
+
+loadCurrency();
+loadCrypto();
