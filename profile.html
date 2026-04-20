@@ -5,32 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="ui-theme.css">
 
   <style>
     body {
       margin: 0;
       font-family: Arial;
       background: #0b132b;
-      color: #fff;
+      color: white;
     }
 
-    /* ================= HEADER (SWAPPED) ================= */
+    /* ================= HEADER ================= */
     .navbar {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 10px 12px;
+      align-items: center;
       background: #1c2541;
-      position: sticky;
-      top: 0;
-    }
-
-    .navbar h3 {
-      margin: 0;
-      font-size: 16px;
-      text-align: center;
-      flex: 1;
+      padding: 10px;
     }
 
     .icon-btn {
@@ -39,57 +29,68 @@
       padding: 6px 10px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 12px;
     }
 
-    /* LEFT BACK */
-    .left {
-      order: 0;
-    }
-
-    /* RIGHT MENU */
-    .right {
-      order: 2;
-    }
-
-    /* ================= CONTAINER ================= */
-    .container {
-      padding: 15px;
-    }
-
-    /* ================= FACEBOOK STYLE USER HEADER ================= */
+    /* ================= PROFILE HEADER (FB STYLE) ================= */
     .profile-header {
-      text-align: center;
-      padding: 15px;
-      margin-top: 10px;
       background: #1c2541;
-      border-radius: 12px;
+      padding: 20px;
+      margin: 12px;
+      border-radius: 14px;
+      text-align: center;
     }
 
-    .profile-header .avatar {
-      width: 60px;
-      height: 60px;
+    .avatar {
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       background: #5bc0be;
       margin: auto;
-      margin-bottom: 8px;
+      cursor: pointer;
+      background-size: cover;
+      background-position: center;
     }
 
-    .profile-header .name {
+    .username {
+      margin-top: 10px;
       font-size: 18px;
       color: #5bc0be;
       font-weight: bold;
     }
 
-    /* ================= FRIEND SYSTEM (TOP ORDER) ================= */
+    /* ================= LAYOUT ================= */
+    .container {
+      padding: 10px;
+    }
+
     .card {
       background: #1c2541;
       padding: 12px;
       border-radius: 12px;
-      margin-top: 12px;
+      margin: 10px;
     }
 
-    /* ================= POST ================= */
+    /* ================= FRIENDS (TOP SECTION) ================= */
+    .top-section {
+      margin: 10px;
+    }
+
+    /* ================= POST BOX ================= */
+    #postInput {
+      width: 100%;
+      min-height: 160px;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 14px;
+      background: #0b132b;
+      color: white;
+      box-shadow: inset 0 0 0 1px #1c2541;
+    }
+
+    /* ================= POSTS ================= */
     .post {
       background: #0b132b;
       padding: 10px;
@@ -98,7 +99,7 @@
       position: relative;
     }
 
-    /* ONLY 3 DOTS */
+    /* ONLY 3 DOT MENU */
     .dots {
       position: absolute;
       right: 8px;
@@ -125,8 +126,8 @@
       color: white;
       padding: 8px;
       text-align: left;
-      cursor: pointer;
       font-size: 12px;
+      cursor: pointer;
     }
 
     .menu-box button:hover {
@@ -134,11 +135,10 @@
       color: black;
     }
 
-    /* SINGLE BACK BUTTON ONLY */
+    /* BACK BUTTON ONLY */
     .back-btn {
-      margin-top: 10px;
+      margin: 10px;
       padding: 6px 10px;
-      font-size: 12px;
       border-radius: 8px;
       background: #5bc0be;
       border: none;
@@ -148,36 +148,40 @@
 
 <body>
 
-<!-- HEADER -->
+<!-- NAV -->
 <div class="navbar">
-
-  <!-- LEFT BACK -->
-  <button class="icon-btn left" onclick="location.href='dashboard.html'">⬅</button>
-
+  <button class="icon-btn" onclick="location.href='dashboard.html'">⬅</button>
   <h3>Profile</h3>
-
-  <!-- RIGHT MENU -->
-  <button class="icon-btn right" onclick="toggleMenu()">☰</button>
-
+  <button class="icon-btn" onclick="toggleMenu()">☰</button>
 </div>
+
+<!-- PROFILE HEADER -->
+<div class="profile-header">
+  <div class="avatar" onclick="changeAvatar()"></div>
+  <div class="username" id="usernameDisplay">Loading...</div>
+</div>
+
+<!-- BACK BUTTON (ONLY ONE) -->
+<button class="back-btn" onclick="location.href='dashboard.html'">Back</button>
 
 <div class="container">
 
-  <!-- PROFILE HEADER (Facebook style username display) -->
-  <div class="profile-header">
-    <div class="avatar"></div>
-    <div class="name" id="usernameDisplay">Loading...</div>
+  <!-- FRIEND SYSTEM (TOP LIKE FACEBOOK) -->
+  <div class="card">
+    <h4>👥 Friend Requests</h4>
+    <div id="friendRequestsBox"></div>
   </div>
 
-  <!-- SINGLE BACK ONLY -->
-  <button class="back-btn" onclick="location.href='dashboard.html'">
-    Back
-  </button>
+  <div class="card">
+    <h4>👤 Friends</h4>
+    <div id="friendsBox"></div>
+  </div>
 
   <!-- CREATE POST -->
   <div class="card">
     <h4>Create Post</h4>
-    <textarea id="postInput" placeholder="Write something..."></textarea>
+
+    <textarea id="postInput" placeholder="What's on your mind?"></textarea>
 
     <div style="display:flex;justify-content:flex-end;margin-top:10px;">
       <button onclick="createPost()">Post</button>
@@ -188,18 +192,6 @@
   <div class="card">
     <h4>My Posts</h4>
     <div id="myPosts"></div>
-  </div>
-
-  <!-- FRIEND REQUESTS (TOP STYLE) -->
-  <div class="card">
-    <h4>👥 Friend Requests</h4>
-    <div id="friendRequestsBox"></div>
-  </div>
-
-  <!-- FRIENDS -->
-  <div class="card">
-    <h4>👤 Friends</h4>
-    <div id="friendsBox"></div>
   </div>
 
 </div>
