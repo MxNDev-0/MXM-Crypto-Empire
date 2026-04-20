@@ -15,7 +15,6 @@
       color: #fff;
     }
 
-    /* ================= HEADER ================= */
     .navbar {
       display: flex;
       align-items: center;
@@ -40,13 +39,11 @@
       font-size: 12px;
     }
 
-    /* ================= CONTAINER ================= */
     .container {
       padding: 15px;
       position: relative;
     }
 
-    /* ================= MENU ================= */
     .dropdown {
       position: absolute;
       top: 45px;
@@ -74,7 +71,6 @@
       font-size: 12px;
     }
 
-    /* ================= USERNAME ================= */
     .username-box {
       text-align: center;
       margin: 12px 0;
@@ -82,7 +78,6 @@
       color: #5bc0be;
     }
 
-    /* ================= POST BOX ================= */
     #postInput {
       width: 100%;
       min-height: 120px;
@@ -104,7 +99,6 @@
       margin-top: 12px;
     }
 
-    /* ================= POSTS ================= */
     .post {
       padding: 10px;
       border-radius: 10px;
@@ -113,7 +107,6 @@
       position: relative;
     }
 
-    /* AVATAR (UI ONLY) */
     .avatar {
       width: 35px;
       height: 35px;
@@ -130,58 +123,6 @@
       margin-bottom: 6px;
     }
 
-    /* ================= 3 DOT MENU ================= */
-    .dot-menu {
-      position: absolute;
-      right: 8px;
-      top: 8px;
-      cursor: pointer;
-      font-size: 18px;
-      padding: 2px 6px;
-    }
-
-    .visibility-menu {
-      position: absolute;
-      right: 8px;
-      top: 28px;
-      background: #1c2541;
-      border-radius: 8px;
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 5;
-    }
-
-    .visibility-menu button {
-      background: none;
-      border: none;
-      color: white;
-      padding: 8px 10px;
-      text-align: left;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .visibility-menu button:hover {
-      background: #5bc0be;
-      color: #000;
-    }
-
-    /* TAG */
-    .tag-private {
-      font-size: 10px;
-      background: #ef4444;
-      padding: 2px 6px;
-      border-radius: 10px;
-    }
-
-    .tag-public {
-      font-size: 10px;
-      background: #22c55e;
-      padding: 2px 6px;
-      border-radius: 10px;
-    }
-
     .small-nav-btn {
       margin-top: 10px;
       padding: 6px 10px;
@@ -190,37 +131,34 @@
       background: #5bc0be;
       border: none;
     }
+
+    /* FRIEND SYSTEM BOXES */
+    .friend-box {
+      margin-top: 10px;
+    }
   </style>
 </head>
 
 <body>
 
-<!-- ================= HEADER ================= -->
 <div class="navbar">
-
   <button class="icon-btn" onclick="toggleMenu()">☰</button>
-
   <h3>Profile 👤</h3>
-
   <button class="icon-btn" onclick="location.href='dashboard.html'">⬅</button>
-
 </div>
 
 <div class="container">
 
-  <!-- DROPDOWN MENU -->
   <div id="dropdownMenu" class="dropdown">
     <input id="usernameInput" placeholder="New username">
     <button onclick="updateUsername()">Save Username</button>
     <button onclick="resetPassword()">Reset Password</button>
   </div>
 
-  <!-- USERNAME -->
   <div class="username-box">
     Username: <span id="usernameDisplay">Loading...</span>
   </div>
 
-  <!-- BACK BUTTON (kept but now optional UI backup) -->
   <button class="small-nav-btn" onclick="location.href='dashboard.html'">
     ⬅ Back
   </button>
@@ -242,6 +180,17 @@
   <div class="card">
     <h4>My Posts</h4>
     <div id="myPosts"></div>
+  </div>
+
+  <!-- ✅ FRIEND SYSTEM (ADDED HERE CLEANLY) -->
+  <div class="card friend-box">
+    <h4>👥 Friend Requests</h4>
+    <div id="friendRequestsBox"></div>
+  </div>
+
+  <div class="card friend-box">
+    <h4>👤 Friends</h4>
+    <div id="friendsBox"></div>
   </div>
 
 </div>
