@@ -30,12 +30,12 @@ onAuthStateChanged(auth, async (u) => {
   loadUsername();
 });
 
-/* ================= MENU (FIXED) ================= */
+/* ================= MENU (FIXED STABLE) ================= */
 window.toggleMenu = function () {
   const menu = document.getElementById("dropdownMenu");
   if (!menu) return;
 
-  menu.style.display = menu.style.display === "block" ? "none" : "block";
+  menu.style.display = (menu.style.display === "block") ? "none" : "block";
 };
 
 /* ================= USERNAME ================= */
@@ -86,7 +86,7 @@ window.createPost = async () => {
   input.value = "";
 };
 
-/* ================= LOAD POSTS (V16 FIXED) ================= */
+/* ================= LOAD POSTS (V16.3 CLEAN UI FIX) ================= */
 function loadPosts() {
   const q = query(collection(db, "posts"), orderBy("time"));
 
@@ -105,26 +105,35 @@ function loadPosts() {
       box.innerHTML += `
         <div class="post">
 
+          <!-- HEADER -->
           <div style="display:flex;justify-content:space-between;align-items:center;">
+
             <div style="display:flex;align-items:center;">
               <div class="avatar"></div>
               <div style="margin-left:8px;">${p.user}</div>
             </div>
 
-            <!-- ✅ WORKING 3 DOT -->
+            <!-- DOTS (FIXED) -->
             <div style="position:relative;">
-              <div style="cursor:pointer;font-size:18px;" onclick="togglePostMenu('${id}')">⋯</div>
+              <div style="cursor:pointer;font-size:20px;"
+                   onclick="togglePostMenu('${id}')">⋯</div>
 
-              <div class="menu-box" id="menu-${id}">
+              <div class="menu-box" id="menu-${id}" style="display:none;flex-direction:column;">
+
                 <button onclick="editPost('${id}','${p.text}')">✏️ Edit</button>
+
                 <button onclick="deletePost('${id}')">🗑 Delete</button>
-                <button onclick="togglePrivacy('${id}', '${p.visibility}')">
+
+                <button onclick="togglePrivacy('${id}')">
                   ${isPrivate ? "🌍 Make Public" : "🔒 Make Private"}
                 </button>
+
               </div>
             </div>
+
           </div>
 
+          <!-- CONTENT -->
           <div style="margin-top:8px;">${p.text}</div>
 
         </div>
@@ -133,16 +142,18 @@ function loadPosts() {
   });
 }
 
-/* ================= TOGGLE MENU (WORKING) ================= */
+/* ================= TOGGLE MENU (FIXED RELIABLE) ================= */
 window.togglePostMenu = function (id) {
   const menu = document.getElementById("menu-" + id);
-
-  // close all first
-  document.querySelectorAll(".menu-box").forEach(m => m.style.display = "none");
-
   if (!menu) return;
 
-  menu.style.display = menu.style.display === "block" ? "none" : "block";
+  const isOpen = menu.style.display === "flex";
+
+  document.querySelectorAll(".menu-box").forEach(m => {
+    m.style.display = "none";
+  });
+
+  menu.style.display = isOpen ? "none" : "flex";
 };
 
 /* ================= EDIT ================= */
@@ -162,11 +173,17 @@ window.deletePost = async function (id) {
   await deleteDoc(doc(db, "posts", id));
 };
 
-/* ================= TOGGLE PRIVACY ================= */
-window.togglePrivacy = async function (id, current) {
+/* ================= TOGGLE PRIVACY (FIXED SAFE VERSION) ================= */
+window.togglePrivacy = async function (id) {
+  const ref = doc(db, "posts", id);
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) return;
+
+  const current = snap.data().visibility || "public";
   const newState = current === "private" ? "public" : "private";
 
-  await updateDoc(doc(db, "posts", id), {
+  await updateDoc(ref, {
     visibility: newState
   });
 };
