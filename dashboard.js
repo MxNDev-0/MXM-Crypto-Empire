@@ -179,6 +179,8 @@ window.goFaq = () => location.href = "faq.html";
 window.goAbout = () => location.href = "about.html";
 window.support = () => alert("Support coming soon");
 
+window.goMessages = () => location.href = "messages.html";
+
 window.goAdmin = () => {
   if (!isAdmin) return alert("Admin only");
   location.href = "admin.html";
