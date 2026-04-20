@@ -65,8 +65,25 @@
       cursor: pointer;
     }
 
-    #adsBox {
-      margin-top: 10px;
+    /* ================= WALLET MARKET BOX (NEW INJECTION) ================= */
+    .market-box {
+      margin-top: 8px;
+      padding: 10px;
+      background: #0b132b;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+      border: 1px solid rgba(91,192,190,0.15);
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .price-label {
+      color: #5bc0be;
     }
   </style>
 </head>
@@ -99,41 +116,54 @@
     <div id="onlineUsers"></div>
   </div>
 
-  <!-- ✅ WALLET UPGRADED -->
+  <!-- ================= WALLET (INJECTED MARKET PRICES ONLY) ================= -->
   <div class="card">
     <h4>💰 Wallet</h4>
 
-    <p>$<span id="walletBalance">0</span> USD</p>
-    <p>€<span id="walletEUR">0</span> EUR</p>
-    <p>£<span id="walletGBP">0</span> GBP</p>
-
+    <p>$<span id="walletBalance">0</span></p>
     <p id="walletUpdated">-</p>
 
-    <div id="cryptoPrices" style="margin-top:10px;font-size:12px;opacity:0.8;">
-      Loading crypto prices...
+    <!-- 🔥 NEW MARKET DATA -->
+    <div class="market-box">
+      <div class="price-row">
+        <span class="price-label">BTC</span>
+        <span id="btcPrice">Loading...</span>
+      </div>
+
+      <div class="price-row">
+        <span class="price-label">ETH</span>
+        <span id="ethPrice">Loading...</span>
+      </div>
+
+      <div class="price-row">
+        <span class="price-label">BNB</span>
+        <span id="bnbPrice">Loading...</span>
+      </div>
+
+      <div class="price-row">
+        <span class="price-label">USDT</span>
+        <span>1.00 USD</span>
+      </div>
+
+      <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1)">
+
+      <div class="price-row">
+        <span class="price-label">NGN (Est.)</span>
+        <span id="ngnRate">Loading...</span>
+      </div>
     </div>
   </div>
 
+  <!-- CHAT -->
   <div class="card">
     <h4>💬 Community Chat</h4>
 
     <div id="chatBox"></div>
-    <div id="adsBox"></div>
 
     <div class="row">
       <input id="chatInput" placeholder="Write something...">
       <button onclick="sendMessage()">Post</button>
     </div>
-  </div>
-
-  <div class="card ads-only">
-    <h4>📢 Sponsored Space</h4>
-    <p>Buy this space to promote your business</p>
-  </div>
-
-  <div class="card earn-card">
-    <h4>💰 Earn</h4>
-    <button onclick="location.href='earn/index.html'">Open Earn</button>
   </div>
 
 </div>
