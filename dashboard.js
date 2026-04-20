@@ -17,8 +17,6 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const API = "https://mxm-backend.onrender.com";
-
 let user = null;
 let userData = null;
 let isAdmin = false;
@@ -37,8 +35,8 @@ onAuthStateChanged(auth, async (u) => {
 
   isAdmin = userData?.role === "admin";
 
-  loadUsers();
-  loadChatV9();
+  loadChatV10();
+  setupPresence();
 });
 
 /* ================= USER ================= */
@@ -60,125 +58,120 @@ async function loadUser() {
   if (snap.exists()) userData = snap.data();
 }
 
-/* ================= USERS ================= */
-function loadUsers() {
-  const box = document.getElementById("onlineUsers");
-  if (!box) return;
+/* ================= CHAT V10 ENGINE ================= */
 
-  onSnapshot(collection(db, "onlineUsers"), (snap) => {
-    box.innerHTML = "";
+const CHAT_PATH = "chats/global/messages";
 
-    snap.forEach(d => {
-      const u = d.data();
-      box.innerHTML += `<div class="user-item">🟢 ${u.username || "user"}</div>`;
-    });
-  });
-}
+let lastRenderId = null;
 
-/* ================= CHAT ================= */
-function loadChatV9() {
+function loadChatV10() {
   const box = document.getElementById("chatBox");
   if (!box) return;
 
-  const q = query(collection(db, "posts"), orderBy("time", "asc"));
+  const q = query(collection(db, CHAT_PATH), orderBy("time", "asc"));
 
   onSnapshot(q, (snap) => {
     let html = "";
 
     snap.forEach(d => {
       const m = d.data();
-      const time = m.time?.toDate?.().toLocaleTimeString() || "";
+
+      if (!m?.text) return;
+
+      const id = d.id;
+      const userName = m.user || "unknown";
+
+      const time = m.time?.toDate
+        ? m.time.toDate().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit"
+          })
+        : "";
+
+      const isMe = userName === user.email.split("@")[0];
 
       html += `
-        <div style="margin:6px 0;padding:6px;background:#1c2541;border-radius:6px;">
-          <b>${m.user}</b>: ${m.text}
-          <div style="font-size:10px;opacity:0.5;">${time}</div>
+        <div style="
+          display:flex;
+          flex-direction:column;
+          align-items:${isMe ? "flex-end" : "flex-start"};
+          margin:6px 0;
+        ">
+
+          <div style="
+            max-width:75%;
+            padding:8px 10px;
+            border-radius:14px;
+            background:${isMe ? "#5bc0be" : "#1c2541"};
+            color:${isMe ? "#000" : "#fff"};
+            font-size:13px;
+            word-break:break-word;
+          ">
+            ${m.text}
+          </div>
+
+          <div style="font-size:9px;opacity:0.5;margin-top:2px;">
+            ${userName} • ${time}
+          </div>
+
         </div>
       `;
     });
 
     box.innerHTML = html;
+    box.scrollTop = box.scrollHeight;
   });
 }
 
-/* ================= SEND MESSAGE ================= */
+/* ================= SEND MESSAGE (V10 SAFE WRITE ================= */
 window.sendMessage = async function () {
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
 
-  if (!text) return;
-
-  await addDoc(collection(db, "posts"), {
-    text,
-    user: user.email.split("@")[0],
-    time: serverTimestamp()
-  });
+  if (!text || !user) return;
 
   input.value = "";
+
+  await addDoc(collection(db, CHAT_PATH), {
+    text,
+    user: user.email.split("@")[0],
+    uid: user.uid,
+    time: serverTimestamp(),
+    status: "sent"
+  });
 };
 
-/* ================= MENU ================= */
-window.toggleMenu = function () {
-  document.getElementById("menu").classList.toggle("active");
-};
+/* ================= PRESENCE ================= */
+function setupPresence() {
+  const ref = doc(db, "presence", user.uid);
 
+  setDoc(ref, {
+    uid: user.uid,
+    username: user.email.split("@")[0],
+    online: true,
+    lastSeen: serverTimestamp()
+  });
+
+  window.addEventListener("beforeunload", async () => {
+    await setDoc(ref, {
+      uid: user.uid,
+      online: false,
+      lastSeen: serverTimestamp()
+    }, { merge: true });
+  });
+}
+
+/* ================= NAV ================= */
 window.logout = async function () {
   await signOut(auth);
   location.href = "index.html";
 };
 
+window.toggleMenu = function () {
+  document.getElementById("menu").classList.toggle("active");
+};
+
 window.goHome = () => location.href = "dashboard.html";
 window.goProfile = () => location.href = "profile.html";
 window.goAdSpace = () => location.href = "ads.html";
-window.support = () => alert("Support coming soon");
-window.goFaq = () => location.href = "faq.html";
-window.goAbout = () => location.href = "about.html";
-window.goBlog = () => location.href = "blog/index.html";
-
-window.goAdmin = () => {
-  if (!userData) return alert("Loading...");
-  if (!isAdmin) return alert("❌ Admin only");
-  location.href = "admin.html";
-};
-
-/* ================= WALLET FX + CRYPTO (NEW) ================= */
-
-async function loadCurrency() {
-  try {
-    const res = await fetch("https://api.exchangerate.host/latest?base=USD");
-    const data = await res.json();
-
-    const usd = Number(document.getElementById("walletBalance")?.innerText || 0);
-
-    document.getElementById("walletEUR").innerText =
-      (usd * data.rates.EUR).toFixed(2);
-
-    document.getElementById("walletGBP").innerText =
-      (usd * data.rates.GBP).toFixed(2);
-
-  } catch (e) {}
-}
-
-async function loadCrypto() {
-  try {
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd"
-    );
-
-    const d = await res.json();
-
-    document.getElementById("cryptoPrices").innerHTML = `
-      🪙 BTC: $${d.bitcoin.usd}<br>
-      💎 ETH: $${d.ethereum.usd}<br>
-      💵 USDT: $${d.tether.usd}
-    `;
-  } catch (e) {}
-}
-
-setInterval(() => {
-  loadCurrency();
-  loadCrypto();
-}, 10000);
-
-loadCurrency();
-loadCrypto();
+window.goAdmin = () => location.href = "admin.html";
