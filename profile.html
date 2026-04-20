@@ -14,167 +14,147 @@
     color: white;
   }
 
-  /* other styles... */
+  /* ================= NAVBAR ================= */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1c2541;
+    padding: 10px;
+  }
 
-  /* ================= FORCE FIX (ADD HERE) ================= */
+  .icon-btn {
+    background: #5bc0be;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
 
-  /* HARD REMOVE ANY OLD BUTTON ROWS */
+  /* ================= PROFILE HEADER (FIXED FACEBOOK STYLE) ================= */
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1c2541;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .left-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #5bc0be;
+    cursor: pointer;
+  }
+
+  .username {
+    font-size: 14px;
+    font-weight: bold;
+    color: #5bc0be;
+  }
+
+  /* ================= 3 DOT MENU ================= */
+  .dots {
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px 8px;
+  }
+
+  .menu-box {
+    position: absolute;
+    right: 10px;
+    top: 40px;
+    background: #1c2541;
+    border-radius: 8px;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 999;
+  }
+
+  .menu-box button {
+    background: none;
+    border: none;
+    color: white;
+    padding: 10px;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .menu-box button:hover {
+    background: #5bc0be;
+    color: black;
+  }
+
+  /* ================= ICON ROW ================= */
+  .icon-row {
+    display: flex;
+    gap: 10px;
+    margin: 10px;
+  }
+
+  .icon-box {
+    background: #1c2541;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  /* ================= POST CARD ================= */
+  .card {
+    background: #1c2541;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  #postInput {
+    width: 100%;
+    min-height: 160px;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    resize: none;
+    background: #0b132b;
+    color: white;
+    box-sizing: border-box;
+  }
+
+  /* ================= POSTS ================= */
+  .post {
+    background: #0b132b;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+    position: relative;
+  }
+
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* HIDE OLD INLINE BUTTONS COMPLETELY */
   .post button {
     display: none !important;
   }
-
-  /* ONLY allow dropdown buttons */
-  .menu-box button {
-    display: block !important;
-  }
-</style>
-
-    /* ================= NAVBAR ================= */
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #1c2541;
-      padding: 10px;
-    }
-
-    .icon-btn {
-      background: #5bc0be;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    /* TEXT BACK BUTTON (NO ARROW) */
-    .back-text {
-      margin: 10px;
-      background: none;
-      border: none;
-      color: #5bc0be;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    /* ================= PROFILE HEADER (FB STYLE SMALL LEFT AVATAR) ================= */
-    .profile-header {
-      display: flex;
-      align-items: center;
-      background: #1c2541;
-      margin: 10px;
-      padding: 10px;
-      border-radius: 12px;
-    }
-
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #5bc0be;
-      flex-shrink: 0;
-    }
-
-    .username {
-      margin-left: 10px;
-      font-size: 15px;
-      color: #5bc0be;
-      font-weight: bold;
-    }
-
-    /* ================= ICON ACTIONS ================= */
-    .icon-row {
-      display: flex;
-      gap: 10px;
-      margin: 10px;
-    }
-
-    .icon-box {
-      background: #1c2541;
-      padding: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    /* ================= POPUPS ================= */
-    .popup {
-      display: none;
-      position: fixed;
-      top: 20%;
-      left: 10%;
-      right: 10%;
-      background: #1c2541;
-      padding: 12px;
-      border-radius: 12px;
-      z-index: 999;
-    }
-
-    /* ================= POST CARD ================= */
-    .card {
-      background: #1c2541;
-      margin: 10px;
-      padding: 10px;
-      border-radius: 12px;
-    }
-
-    /* FIXED TEXTAREA (NO OVERFLOW, SYMMETRIC PADDING) */
-    #postInput {
-      width: 100%;
-      min-height: 140px;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      resize: none;
-      font-size: 14px;
-      background: #0b132b;
-      color: white;
-      box-sizing: border-box;
-    }
-
-    /* ================= POSTS ================= */
-    .post {
-      background: #0b132b;
-      padding: 10px;
-      border-radius: 10px;
-      margin-top: 10px;
-      position: relative;
-    }
-
-    .dots {
-      position: absolute;
-      right: 8px;
-      top: 8px;
-      cursor: pointer;
-      font-size: 18px;
-    }
-
-    .menu-box {
-      position: absolute;
-      right: 8px;
-      top: 28px;
-      background: #1c2541;
-      border-radius: 8px;
-      display: none;
-      flex-direction: column;
-      z-index: 10;
-    }
-
-    .menu-box button {
-      background: none;
-      border: none;
-      color: white;
-      padding: 8px;
-      font-size: 12px;
-      text-align: left;
-    }
   </style>
 </head>
 
 <body>
 
-<!-- NAV -->
 <div class="navbar">
   <button class="icon-btn" onclick="goBackText()">Back</button>
   <h3>Profile</h3>
@@ -182,20 +162,18 @@
 </div>
 
 <!-- PROFILE HEADER -->
-<div class="profile-header" style="display:flex;align-items:center;justify-content:space-between;">
-  
-  <!-- LEFT SIDE -->
-  <div style="display:flex;align-items:center;">
+<div class="profile-header">
+
+  <div class="left-profile">
     <div class="avatar" onclick="changeAvatar()"></div>
     <div class="username" id="usernameDisplay">Loading...</div>
   </div>
 
-  <!-- RIGHT SIDE (3 DOTS FIXED POSITION) -->
+  <!-- RIGHT 3 DOT MENU -->
   <div style="position:relative;">
-    <div class="dots" onclick="togglePostMenu(this)">⋯</div>
+    <div class="dots" onclick="togglePostMenu()">⋯</div>
 
-    <!-- MENU (ONLY MENU CONTENT - NO BUTTONS OUTSIDE) -->
-    <div class="menu-box">
+    <div class="menu-box" id="postMenu">
       <button onclick="editPost()">Edit</button>
       <button onclick="deletePost()">Delete</button>
     </div>
@@ -203,20 +181,20 @@
 
 </div>
 
-<!-- FRIEND ICONS ONLY -->
+<!-- FRIEND ICONS -->
 <div class="icon-row">
   <div class="icon-box" onclick="openRequests()">👥 Requests</div>
   <div class="icon-box" onclick="openFriends()">👤 Friends</div>
 </div>
 
 <!-- POPUPS -->
-<div id="requestsPopup" class="popup">
+<div id="requestsPopup" class="card" style="display:none;">
   <h4>Friend Requests</h4>
   <div id="friendRequestsBox"></div>
   <button onclick="closePopup('requestsPopup')">Close</button>
 </div>
 
-<div id="friendsPopup" class="popup">
+<div id="friendsPopup" class="card" style="display:none;">
   <h4>Friends</h4>
   <div id="friendsBox"></div>
   <button onclick="closePopup('friendsPopup')">Close</button>
@@ -242,21 +220,26 @@
 <script type="module" src="profile.js"></script>
 
 <script>
-  function goBackText(){
-    location.href = "dashboard.html";
-  }
+function goBackText(){
+  location.href = "dashboard.html";
+}
 
-  function openRequests(){
-    document.getElementById("requestsPopup").style.display = "block";
-  }
+function togglePostMenu(){
+  const m = document.getElementById("postMenu");
+  m.style.display = m.style.display === "flex" ? "none" : "flex";
+}
 
-  function openFriends(){
-    document.getElementById("friendsPopup").style.display = "block";
-  }
+function openRequests(){
+  document.getElementById("requestsPopup").style.display = "block";
+}
 
-  function closePopup(id){
-    document.getElementById(id).style.display = "none";
-  }
+function openFriends(){
+  document.getElementById("friendsPopup").style.display = "block";
+}
+
+function closePopup(id){
+  document.getElementById(id).style.display = "none";
+}
 </script>
 
 </body>
