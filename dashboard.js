@@ -16,15 +16,12 @@ import {
   setDoc,
   updateDoc,
   serverTimestamp,
-  deleteDoc,
-  arrayUnion,
-  arrayRemove
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let user = null;
 let userData = null;
 let isAdmin = false;
-
 let replyTo = null;
 
 /* ================= AUTH ================= */
@@ -38,6 +35,7 @@ onAuthStateChanged(auth, async (u) => {
 
   isAdmin = userData?.role === "admin";
 
+  loadUsers();
   loadChatV11();
 });
 
@@ -58,6 +56,20 @@ async function ensureUser() {
 async function loadUser() {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (snap.exists()) userData = snap.data();
+}
+
+/* ================= USERS ================= */
+function loadUsers() {
+  const box = document.getElementById("onlineUsers");
+  if (!box) return;
+
+  onSnapshot(collection(db, "onlineUsers"), (snap) => {
+    box.innerHTML = "";
+    snap.forEach(d => {
+      const u = d.data();
+      box.innerHTML += `<div class="user-item">🟢 ${u.username || "user"}</div>`;
+    });
+  });
 }
 
 /* ================= CHAT V11 ================= */
@@ -101,27 +113,18 @@ function loadChatV11() {
             ${time}
           </div>
 
-          <!-- ACTIONS -->
-          <div style="margin-top:5px;display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap;">
 
-            <button onclick="likeMsg('${id}')">
-              👍 ${likes.length}
-            </button>
+            <button onclick="likeMsg('${id}')">👍 ${likes.length}</button>
 
-            <button onclick="setReply('${id}', \`${text}\`)">
-              💬 Reply
-            </button>
+            <button onclick="setReply('${id}', \`${text}\`)">Reply</button>
 
             ${isMe ? `
-              <button onclick="editMsg('${id}', \`${text}\`)">
-                ✏️ Edit
-              </button>
+              <button onclick="editMsg('${id}', \`${text}\`)">Edit</button>
             ` : ""}
 
             ${isAdmin ? `
-              <button onclick="deletePost('${id}')">
-                🗑 Delete
-              </button>
+              <button onclick="deletePost('${id}')">Delete</button>
             ` : ""}
 
           </div>
@@ -135,7 +138,7 @@ function loadChatV11() {
   });
 }
 
-/* ================= SEND MESSAGE ================= */
+/* ================= SEND ================= */
 window.sendMessage = async function () {
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
@@ -148,16 +151,15 @@ window.sendMessage = async function () {
     text,
     user: user.email.split("@")[0],
     time: serverTimestamp(),
-    replyTo: replyTo || null,
     replyText: replyTo ? replyTo.text : null,
     likes: []
   });
 
   replyTo = null;
-  document.getElementById("replyBox").style.display = "none";
+  document.getElementById("replyBox")?.style && (document.getElementById("replyBox").style.display = "none");
 };
 
-/* ================= LIKE SYSTEM ================= */
+/* ================= LIKE ================= */
 window.likeMsg = async function (id) {
   const ref = doc(db, "posts", id);
   const snap = await getDoc(ref);
@@ -180,7 +182,10 @@ window.likeMsg = async function (id) {
 window.setReply = function (id, text) {
   replyTo = { id, text };
 
-  document.getElementById("replyBox").style.display = "block";
+  const box = document.getElementById("replyBox");
+  if (!box) return;
+
+  box.style.display = "block";
   document.getElementById("replyText").innerText = text;
 };
 
@@ -189,7 +194,7 @@ window.cancelReply = function () {
   document.getElementById("replyBox").style.display = "none";
 };
 
-/* ================= EDIT MESSAGE ================= */
+/* ================= EDIT ================= */
 window.editMsg = async function (id, oldText) {
   const newText = prompt("Edit message:", oldText);
   if (!newText) return;
@@ -199,19 +204,43 @@ window.editMsg = async function (id, oldText) {
   });
 };
 
-/* ================= DELETE ================= */
+/* ================= DELETE FIX ================= */
 window.deletePost = async function (id) {
-  if (!isAdmin) return alert("Admin only");
+  if (!isAdmin) return alert("❌ Admin only");
 
   try {
     await deleteDoc(doc(db, "posts", id));
+    alert("Deleted");
   } catch (e) {
+    console.error(e);
     alert("Delete failed");
   }
 };
 
-/* ================= LOGOUT ================= */
+/* ================= MENU (FIXED) ================= */
+window.toggleMenu = function () {
+  document.getElementById("menu").classList.toggle("active");
+};
+
 window.logout = async function () {
   await signOut(auth);
   location.href = "index.html";
+};
+
+window.goHome = () => location.href = "dashboard.html";
+window.goProfile = () => location.href = "profile.html";
+window.goAdSpace = () => location.href = "ads.html";
+window.goBlog = () => location.href = "blog/index.html";
+window.goFaq = () => location.href = "faq.html";
+window.goAbout = () => location.href = "about.html";
+window.support = () => alert("Support coming soon");
+
+window.goAdmin = () => {
+  if (!userData) return alert("Loading...");
+  if (!isAdmin) return alert("❌ Admin only");
+  location.href = "admin.html";
+};
+
+window.openDeveloper = () => {
+  alert("Developer tools coming soon");
 };
