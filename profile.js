@@ -14,7 +14,8 @@ import {
   updateDoc,
   doc,
   getDoc,
-  setDoc
+  setDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let user = null;
@@ -29,7 +30,7 @@ onAuthStateChanged(auth, async (u) => {
   loadUsername();
 });
 
-/* ================= MENU ================= */
+/* ================= MENU (FIXED STABLE TOGGLE) ================= */
 window.toggleMenu = function () {
   const menu =
     document.getElementById("dropdownMenu") ||
@@ -37,30 +38,47 @@ window.toggleMenu = function () {
 
   if (!menu) return;
 
-  menu.classList.toggle("active");
-  menu.style.display = menu.classList.contains("active") ? "block" : "none";
+  const isOpen =
+    menu.style.display === "block" ||
+    menu.classList.contains("active");
+
+  if (isOpen) {
+    menu.style.display = "none";
+    menu.classList.remove("active");
+  } else {
+    menu.style.display = "block";
+    menu.classList.add("active");
+  }
 };
 
 /* ================= USERNAME ================= */
 async function loadUsername() {
+  if (!user) return;
+
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
 
   const display = document.getElementById("usernameDisplay");
 
-  display.innerText =
-    snap.exists() && snap.data().username
-      ? snap.data().username
-      : "Not set";
+  if (snap.exists() && snap.data().username) {
+    display.innerText = snap.data().username;
+  } else {
+    display.innerText = "Not set";
+  }
 }
 
+/* ================= UPDATE USERNAME ================= */
 window.updateUsername = async () => {
   const input = document.getElementById("usernameInput");
   const username = input.value.trim();
 
   if (!username) return alert("Enter username");
 
-  await setDoc(doc(db, "users", user.uid), { username }, { merge: true });
+  await setDoc(
+    doc(db, "users", user.uid),
+    { username },
+    { merge: true }
+  );
 
   document.getElementById("usernameDisplay").innerText = username;
   input.value = "";
@@ -90,7 +108,7 @@ window.createPost = async () => {
   input.value = "";
 };
 
-/* ================= LOAD POSTS (CLEAN + NO BUTTONS BUG) ================= */
+/* ================= LOAD POSTS (FIXED FACEBOOK STYLE) ================= */
 function loadPosts() {
   const q = query(collection(db, "posts"), orderBy("time"));
 
@@ -100,24 +118,33 @@ function loadPosts() {
 
     snap.forEach(docSnap => {
       const p = docSnap.data();
+      const id = docSnap.id;
 
       if (p.user !== user.email.split("@")[0]) return;
 
-      const id = docSnap.id;
-
       box.innerHTML += `
-        <div class="post">
+        <div class="post" style="position:relative;">
 
           <div class="post-header">
             <div class="avatar"></div>
             <div>${p.user}</div>
           </div>
 
-          <div>${p.text}</div>
+          <div style="margin-top:6px;">
+            ${p.text}
+          </div>
 
-          <!-- ONLY ONE CLEAN 3 DOT MENU PER POST -->
-          <div class="dots" onclick="togglePostMenu('${id}')">⋯</div>
+          <!-- 3 DOT MENU (FORCED TOP RIGHT ONLY) -->
+          <div style="
+            position:absolute;
+            top:8px;
+            right:8px;
+            cursor:pointer;
+            font-size:20px;
+            user-select:none;
+          " onclick="togglePostMenu('${id}')">⋯</div>
 
+          <!-- DROPDOWN MENU -->
           <div class="menu-box" id="menu-${id}">
             <button onclick="deletePost('${id}')">Delete</button>
           </div>
@@ -128,20 +155,23 @@ function loadPosts() {
   });
 }
 
-/* ================= 3 DOT MENU FIX ================= */
+/* ================= POST MENU TOGGLE (ISOLATED SAFE) ================= */
 window.togglePostMenu = (id) => {
-  const el = document.getElementById("menu-" + id);
-  if (!el) return;
+  const menu = document.getElementById("menu-" + id);
+  if (!menu) return;
 
+  // close others
   document.querySelectorAll(".menu-box").forEach(m => {
-    if (m.id !== "menu-" + id) m.style.display = "none";
+    if (m.id !== "menu-" + id) {
+      m.style.display = "none";
+    }
   });
 
-  el.style.display = el.style.display === "flex" ? "none" : "flex";
+  menu.style.display =
+    menu.style.display === "block" ? "none" : "block";
 };
 
-/* ================= DELETE ONLY (NO VISIBILITY SYSTEM ANYMORE) ================= */
+/* ================= DELETE ================= */
 window.deletePost = async (id) => {
-  await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js")
-    .then(m => m.deleteDoc(doc(db, "posts", id)));
+  await deleteDoc(doc(db, "posts", id));
 };
