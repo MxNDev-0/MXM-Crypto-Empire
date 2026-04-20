@@ -29,7 +29,7 @@ onAuthStateChanged(auth, async (u) => {
   loadUsername();
 });
 
-/* ================= MENU FIX (STABLE) ================= */
+/* ================= MENU ================= */
 window.toggleMenu = function () {
   const menu =
     document.getElementById("dropdownMenu") ||
@@ -37,69 +37,41 @@ window.toggleMenu = function () {
 
   if (!menu) return;
 
-  const isOpen =
-    menu.style.display === "block" ||
-    menu.classList.contains("active");
-
-  menu.style.display = isOpen ? "none" : "block";
   menu.classList.toggle("active");
+  menu.style.display = menu.classList.contains("active") ? "block" : "none";
 };
 
-/* ================= USERNAME LOAD ================= */
+/* ================= USERNAME ================= */
 async function loadUsername() {
-  if (!user) return;
-
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
 
   const display = document.getElementById("usernameDisplay");
 
-  if (snap.exists() && snap.data().username) {
-    display.innerText = snap.data().username;
-  } else {
-    display.innerText = "Not set";
-  }
+  display.innerText =
+    snap.exists() && snap.data().username
+      ? snap.data().username
+      : "Not set";
 }
 
-/* ================= UPDATE USERNAME ================= */
 window.updateUsername = async () => {
   const input = document.getElementById("usernameInput");
   const username = input.value.trim();
 
-  if (!username) {
-    alert("Enter username");
-    return;
-  }
+  if (!username) return alert("Enter username");
 
-  try {
-    await setDoc(
-      doc(db, "users", user.uid),
-      { username },
-      { merge: true }
-    );
+  await setDoc(doc(db, "users", user.uid), { username }, { merge: true });
 
-    document.getElementById("usernameDisplay").innerText = username;
-
-    input.value = "";
-    alert("Username updated ✅");
-
-  } catch (err) {
-    console.error(err);
-    alert("Failed to update username");
-  }
+  document.getElementById("usernameDisplay").innerText = username;
+  input.value = "";
 };
 
 /* ================= RESET PASSWORD ================= */
 window.resetPassword = async () => {
   if (!user?.email) return;
 
-  try {
-    await sendPasswordResetEmail(auth, user.email);
-    alert("Password reset link sent 📩");
-  } catch (err) {
-    console.error(err);
-    alert("Failed to send reset email");
-  }
+  await sendPasswordResetEmail(auth, user.email);
+  alert("Reset email sent 📩");
 };
 
 /* ================= CREATE POST ================= */
@@ -112,14 +84,13 @@ window.createPost = async () => {
   await addDoc(collection(db, "posts"), {
     text,
     user: user.email.split("@")[0],
-    visibility: "public",
     time: Date.now()
   });
 
   input.value = "";
 };
 
-/* ================= LOAD POSTS (CLEAN V15 FIX) ================= */
+/* ================= LOAD POSTS (CLEAN + NO BUTTONS BUG) ================= */
 function loadPosts() {
   const q = query(collection(db, "posts"), orderBy("time"));
 
@@ -129,11 +100,10 @@ function loadPosts() {
 
     snap.forEach(docSnap => {
       const p = docSnap.data();
-      const id = docSnap.id;
 
       if (p.user !== user.email.split("@")[0]) return;
 
-      const isPrivate = p.visibility === "private";
+      const id = docSnap.id;
 
       box.innerHTML += `
         <div class="post">
@@ -145,18 +115,11 @@ function loadPosts() {
 
           <div>${p.text}</div>
 
-          <div style="margin-top:6px;">
-            <span class="${isPrivate ? "tag-private" : "tag-public"}">
-              ${isPrivate ? "🔒 Private" : "🌍 Public"}
-            </span>
-          </div>
+          <!-- ONLY ONE CLEAN 3 DOT MENU PER POST -->
+          <div class="dots" onclick="togglePostMenu('${id}')">⋯</div>
 
-          <!-- 3 DOT MENU ONLY -->
-          <div class="dot-menu" onclick="toggleVisibilityMenu('${id}')">⋮</div>
-
-          <div class="visibility-menu" id="menu-${id}" style="display:none;flex-direction:column;">
-            <button onclick="setPublic('${id}')">🌍 Public</button>
-            <button onclick="setPrivate('${id}')">🔒 Private</button>
+          <div class="menu-box" id="menu-${id}">
+            <button onclick="deletePost('${id}')">Delete</button>
           </div>
 
         </div>
@@ -165,33 +128,20 @@ function loadPosts() {
   });
 }
 
-/* ================= TOGGLE MENU (FIXED) ================= */
-window.toggleVisibilityMenu = (id) => {
+/* ================= 3 DOT MENU FIX ================= */
+window.togglePostMenu = (id) => {
   const el = document.getElementById("menu-" + id);
   if (!el) return;
 
-  const isVisible = el.style.display === "flex";
-
-  document.querySelectorAll(".visibility-menu").forEach(m => {
-    m.style.display = "none";
+  document.querySelectorAll(".menu-box").forEach(m => {
+    if (m.id !== "menu-" + id) m.style.display = "none";
   });
 
-  el.style.display = isVisible ? "none" : "flex";
+  el.style.display = el.style.display === "flex" ? "none" : "flex";
 };
 
-/* ================= VISIBILITY ================= */
-window.setPublic = async (id) => {
-  await updateDoc(doc(db, "posts", id), {
-    visibility: "public"
-  });
-
-  document.getElementById("menu-" + id).style.display = "none";
-};
-
-window.setPrivate = async (id) => {
-  await updateDoc(doc(db, "posts", id), {
-    visibility: "private"
-  });
-
-  document.getElementById("menu-" + id).style.display = "none";
+/* ================= DELETE ONLY (NO VISIBILITY SYSTEM ANYMORE) ================= */
+window.deletePost = async (id) => {
+  await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js")
+    .then(m => m.deleteDoc(doc(db, "posts", id)));
 };
