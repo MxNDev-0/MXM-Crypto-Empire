@@ -7,36 +7,24 @@
   <link rel="stylesheet" href="style.css">
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       background: #0b132b;
       color: white;
-      overflow-x: hidden;
     }
 
-    .container {
-      padding: 10px;
-      max-width: 100%;
-    }
-
-    /* ================= NAVBAR ================= */
+    /* ================= NAVBAR FIXED LAYOUT ================= */
     .navbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 12px;
       background: #1c2541;
-      position: sticky;
-      top: 0;
-      z-index: 9999;
+      padding: 10px;
+      position: relative;
     }
 
-    .nav-left, .nav-right {
+    .nav-left {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -48,16 +36,49 @@
       transform: translateX(-50%);
       font-size: 18px;
       margin: 0;
-      color: white;
-      white-space: nowrap;
+      pointer-events: none;
     }
 
-    /* ================= NOTIFICATIONS ================= */
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ================= HAMBURGER MENU ================= */
+    .menu {
+      z-index: 9999;
+      width: 200px;
+      background: #1c2541;
+      border-radius: 12px;
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 50px;
+      left: 10px;
+    }
+
+    .menu.active {
+      display: flex;
+    }
+
+    .menu button {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* ================= NOTIFICATION ================= */
     .notif-wrapper {
       position: relative;
       cursor: pointer;
-      font-size: 16px;
-      padding: 5px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
     }
 
     .notif-badge {
@@ -85,52 +106,54 @@
       z-index: 9999;
     }
 
+    /* ================= ADS ================= */
+    .ads-container {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ads-slider {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+
+    .ad {
+      min-width: 100%;
+      text-align: center;
+      padding: 15px;
+      background: #0b132b;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
     /* ================= CARDS ================= */
+    .container {
+      padding: 10px;
+    }
+
     .card {
       background: #1c2541;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      overflow: hidden;
+      margin-top: 10px;
       padding: 10px;
+      border-radius: 10px;
     }
 
     /* ================= DISCOVER ================= */
-    #discoverBox {
-      margin-top: 10px;
-    }
-
-    .discover-card {
-      background: #0b132b;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      overflow: hidden;
+    #discoverBox .card {
       cursor: pointer;
     }
 
-    .discover-card img {
+    #discoverBox img {
       width: 100%;
-      height: 160px;
-      object-fit: cover;
+      border-radius: 8px;
     }
 
-    .discover-content {
-      padding: 10px;
-    }
-
-    .discover-title {
-      color: #5bc0be;
-      font-weight: bold;
-    }
-
-    .discover-text {
-      font-size: 12px;
-      opacity: 0.8;
-    }
   </style>
 </head>
 
 <body>
 
+<!-- ================= NAVBAR ================= -->
 <div class="navbar">
 
   <div class="nav-left">
@@ -140,40 +163,67 @@
   <h3 class="nav-title">MCN Engine</h3>
 
   <div class="nav-right">
+
+    <!-- 🔔 CENTERED FEATURE (FIXED POSITION LOGIC) -->
     <div class="notif-wrapper" onclick="toggleNotif()">
       🔔
       <span id="notifCount" class="notif-badge"></span>
     </div>
 
     <button onclick="logout()">Logout</button>
-  </div>
 
+  </div>
 </div>
 
+<!-- NOTIFICATIONS PANEL -->
 <div id="notifPanel" class="notif-panel"></div>
 
+<!-- MENU -->
+<div id="menu" class="menu">
+  <button onclick="goHome()">🏠 Home</button>
+  <button onclick="goProfile()">👤 Profile</button>
+  <button onclick="goMessages()">💬 Messages</button>
+  <button onclick="goAdSpace()">🚀 Ads</button>
+  <button onclick="goBlog()">📰 Blog</button>
+  <button onclick="goFaq()">❓ FAQ</button>
+  <button onclick="goAbout()">ℹ️ About</button>
+  <button onclick="goAdmin()">🔐 Admin</button>
+</div>
+
+<!-- ================= MAIN ================= -->
 <div class="container">
 
+  <!-- ADS -->
   <div class="card">
     <h4>🔥 Sponsored Ads</h4>
+
+    <div class="ads-container">
+      <div class="ads-slider" id="adsSlider">
+        <div class="ad">🚀 Promote your project here</div>
+        <div class="ad">💰 Buy ad space on MCN Engine</div>
+        <div class="ad">📢 Your ad here</div>
+      </div>
+    </div>
   </div>
 
+  <!-- PRICES -->
   <div class="card">
     <h4>📊 Live Prices</h4>
     <div id="priceBox">Loading...</div>
   </div>
 
+  <!-- DISCOVER FEED -->
   <div class="card">
     <h4>📰 Discover Feed</h4>
-    <div id="discoverBox">Loading...</div>
+    <div id="discoverBox">Loading feed...</div>
   </div>
 
 </div>
 
 <script type="module" src="dashboard.js"></script>
 
+<!-- DISCOVER SCRIPT (SAFE - NO FIREBASE CONFLICT) -->
 <script>
-/* ================= DISCOVER ================= */
 async function loadDiscover() {
   const box = document.getElementById("discoverBox");
 
@@ -185,15 +235,15 @@ async function loadDiscover() {
 
     data.forEach(post => {
       box.innerHTML += `
-        <div class="discover-card" onclick="openPost('${post.id}')">
+        <div class="card" onclick="openPost('${post.id}')">
 
           ${post.image ? `<img src="${post.image}">` : ""}
 
-          <div class="discover-content">
-            <div class="discover-title">${post.title}</div>
-            <div class="discover-text">
-              ${(post.content || "").substring(0, 120)}...
-            </div>
+          <div>
+            <b style="color:#5bc0be">${post.title}</b>
+            <p style="font-size:12px;opacity:0.8;">
+              ${(post.content || "").substring(0,120)}...
+            </p>
           </div>
 
         </div>
@@ -205,17 +255,9 @@ async function loadDiscover() {
   }
 }
 
-/* FIXED ROUTING */
 function openPost(id) {
-  location.href = "blog/post.html?id=" + id;
+  location.href = "post.html?id=" + id;
 }
-
-/* NOTIFICATION TOGGLE */
-window.toggleNotif = function () {
-  const panel = document.getElementById("notifPanel");
-  if (!panel) return;
-  panel.style.display = panel.style.display === "block" ? "none" : "block";
-};
 
 loadDiscover();
 </script>
