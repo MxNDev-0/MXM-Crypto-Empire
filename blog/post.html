@@ -104,19 +104,28 @@
 <button class="back" onclick="location.href='index.html'">← Back</button>
 
 <script>
-
 /* ================= GET POST ID ================= */
 function getPostId() {
   const params = new URLSearchParams(window.location.search);
   return params.get("id");
 }
 
-/* ================= AUTO FORMAT CONTENT (🔥 NEW) ================= */
+/* ================= FORMAT CONTENT (FIXED + LINKS) ================= */
 function formatContent(text) {
   if (!text) return "";
 
   return text
-    .split(/\n+/) // split by line breaks
+    // remove weird invisible characters
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+
+    // convert links to clickable
+    .replace(
+      /(https?:\/\/[^\s]+)/g,
+      '<a href="$1" target="_blank" style="color:#5bc0be;word-break:break-word;">$1</a>'
+    )
+
+    // paragraph formatting
+    .split(/\n+/)
     .filter(p => p.trim() !== "")
     .map(p => `<p>${p.trim()}</p>`)
     .join("");
@@ -144,44 +153,26 @@ async function loadPost() {
       return;
     }
 
-    // TITLE
     document.title = post.title;
 
-    // SEO DESCRIPTION
     const desc = (post.content || "").substring(0, 150);
 
-    document
-      .querySelector('meta[name="description"]')
-      .setAttribute("content", desc);
+    document.querySelector('meta[name="description"]').setAttribute("content", desc);
+    document.querySelector('meta[property="og:title"]').setAttribute("content", post.title);
+    document.querySelector('meta[property="og:description"]').setAttribute("content", desc);
+    document.querySelector('meta[property="og:image"]').setAttribute(
+      "content",
+      post.image || "https://via.placeholder.com/600x300"
+    );
+    document.querySelector('meta[property="og:url"]').setAttribute("content", window.location.href);
 
-    // OPEN GRAPH
-    document
-      .querySelector('meta[property="og:title"]')
-      .setAttribute("content", post.title);
-
-    document
-      .querySelector('meta[property="og:description"]')
-      .setAttribute("content", desc);
-
-    document
-      .querySelector('meta[property="og:image"]')
-      .setAttribute("content", post.image || "https://via.placeholder.com/600x300");
-
-    document
-      .querySelector('meta[property="og:url"]')
-      .setAttribute("content", window.location.href);
-
-    // STRUCTURED DATA (SEO BOOST)
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "Article",
       "headline": post.title,
       "image": [post.image || "https://via.placeholder.com/600x300"],
       "datePublished": new Date().toISOString(),
-      "author": {
-        "@type": "Organization",
-        "name": "MCN Engine"
-      }
+      "author": { "@type": "Organization", "name": "MCN Engine" }
     };
 
     const script = document.createElement("script");
@@ -189,18 +180,12 @@ async function loadPost() {
     script.innerHTML = JSON.stringify(structuredData);
     document.head.appendChild(script);
 
-    // RENDER POST (🔥 FIXED)
     document.getElementById("postContainer").innerHTML = `
       <div class="title">${post.title}</div>
-
       ${post.image ? `<img class="image" src="${post.image}">` : ""}
-
-      <div class="content">
-        ${formatContent(post.content)}
-      </div>
+      <div class="content">${formatContent(post.content)}</div>
     `;
 
-    // VIEW TRACKING
     fetch(`https://mxm-backend.onrender.com/blog/view/${post.id}`, {
       method: "POST"
     });
@@ -211,7 +196,6 @@ async function loadPost() {
   }
 }
 
-/* ================= INIT ================= */
 loadPost();
 
 </script>
