@@ -6,20 +6,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- SEO -->
   <meta name="description" content="Latest crypto earning guides, referral programs and online income tips.">
 
-  <!-- Open Graph -->
   <meta property="og:title" content="MCN Engine Blog">
   <meta property="og:description" content="Earn crypto, discover platforms and grow online income.">
   <meta property="og:type" content="article">
   <meta property="og:image" content="https://via.placeholder.com/600x300">
   <meta property="og:url" content="">
 
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-
-  <!-- Google indexing -->
   <meta name="robots" content="index, follow">
 
   <style>
@@ -28,12 +23,15 @@
       font-family: Arial, sans-serif;
       background: #0b132b;
       color: #fff;
+      line-height: 1.6;
     }
 
     .header {
       background: #1c2541;
       padding: 15px;
       text-align: center;
+      position: sticky;
+      top: 0;
     }
 
     .header h1 {
@@ -43,50 +41,54 @@
     }
 
     .container {
-      padding: 15px;
-      max-width: 700px;
+      padding: 18px;
+      max-width: 750px;
       margin: auto;
     }
 
     .title {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: bold;
       color: #5bc0be;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
 
     .image {
       width: 100%;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-
-    .content {
-      font-size: 15px;
-      line-height: 1.7;
-      opacity: 0.95;
+      border-radius: 12px;
+      margin-bottom: 18px;
     }
 
     .content p {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      font-size: 16px;
+      opacity: 0.95;
     }
 
+    .content a {
+      color: #5bc0be;
+      word-break: break-word;
+    }
+
+    /* 🔥 FLOATING BACK BUTTON (FIXED POSITION) */
     .back {
       position: fixed;
-      bottom: 15px;
-      right: 15px;
+      bottom: 20px;
+      right: 20px;
       background: #5bc0be;
       color: #000;
       border: none;
-      padding: 10px 14px;
+      padding: 12px 16px;
       border-radius: 50px;
       font-weight: bold;
       cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
     .loading {
       text-align: center;
-      padding: 40px;
+      padding: 50px;
+      opacity: 0.7;
     }
   </style>
 </head>
@@ -104,40 +106,34 @@
 <button class="back" onclick="location.href='index.html'">← Back</button>
 
 <script>
-/* ================= GET POST ID ================= */
+
 function getPostId() {
   const params = new URLSearchParams(window.location.search);
   return params.get("id");
 }
 
-/* ================= FORMAT CONTENT (FIXED + LINKS) ================= */
+/* 🔥 CLEAN + SMART FORMATTER */
 function formatContent(text) {
   if (!text) return "";
 
   return text
-    // remove weird invisible characters
     .replace(/[\u200B-\u200D\uFEFF]/g, "")
-
-    // convert links to clickable
+    .replace(/\n{2,}/g, "\n") // remove excessive spacing
     .replace(
       /(https?:\/\/[^\s]+)/g,
-      '<a href="$1" target="_blank" style="color:#5bc0be;word-break:break-word;">$1</a>'
+      '<a href="$1" target="_blank">$1</a>'
     )
-
-    // paragraph formatting
-    .split(/\n+/)
+    .split("\n")
     .filter(p => p.trim() !== "")
     .map(p => `<p>${p.trim()}</p>`)
     .join("");
 }
 
-/* ================= LOAD POST ================= */
 async function loadPost() {
   const id = getPostId();
 
   if (!id) {
-    document.getElementById("postContainer").innerHTML =
-      "<p>Invalid post.</p>";
+    document.getElementById("postContainer").innerHTML = "<p>Invalid post.</p>";
     return;
   }
 
@@ -148,8 +144,7 @@ async function loadPost() {
     const post = data.find(p => p.id === id);
 
     if (!post) {
-      document.getElementById("postContainer").innerHTML =
-        "<p>Post not found.</p>";
+      document.getElementById("postContainer").innerHTML = "<p>Post not found.</p>";
       return;
     }
 
@@ -166,20 +161,6 @@ async function loadPost() {
     );
     document.querySelector('meta[property="og:url"]').setAttribute("content", window.location.href);
 
-    const structuredData = {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": post.title,
-      "image": [post.image || "https://via.placeholder.com/600x300"],
-      "datePublished": new Date().toISOString(),
-      "author": { "@type": "Organization", "name": "MCN Engine" }
-    };
-
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.innerHTML = JSON.stringify(structuredData);
-    document.head.appendChild(script);
-
     document.getElementById("postContainer").innerHTML = `
       <div class="title">${post.title}</div>
       ${post.image ? `<img class="image" src="${post.image}">` : ""}
@@ -191,8 +172,7 @@ async function loadPost() {
     });
 
   } catch (err) {
-    document.getElementById("postContainer").innerHTML =
-      "<p>Error loading post.</p>";
+    document.getElementById("postContainer").innerHTML = "<p>Error loading post.</p>";
   }
 }
 
