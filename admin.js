@@ -1,8 +1,6 @@
 import { auth, db } from "./firebase.js";
 
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
   doc,
@@ -65,7 +63,7 @@ window.addEarning = async () => {
   alert("Earning added!");
 };
 
-/* ================= BLOG CREATE (FIXED) ================= */
+/* ================= BLOG CREATE (CLEAN FIX) ================= */
 window.createBlog = async () => {
   const title = document.getElementById("blogTitle").value;
   const content = document.getElementById("blogContent").value;
@@ -83,9 +81,9 @@ window.createBlog = async () => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        title,
-        content,
-        image
+        title: title.trim(),
+        content: content.trim(),
+        image: image || ""
       })
     });
 
