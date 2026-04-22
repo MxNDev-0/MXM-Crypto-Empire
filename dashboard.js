@@ -258,11 +258,15 @@ function loadNotifications() {
   });
 }
 
-/* ADS SLIDER */
+/* ✅ REAL ADS SLIDER */
+let currentAd = 0;
+
 setInterval(() => {
   const slider = document.getElementById("adsSlider");
   if (!slider) return;
 
-  const ads = slider.children;
-  slider.appendChild(ads[0]);
+  const total = slider.children.length;
+  currentAd = (currentAd + 1) % total;
+
+  slider.style.transform = `translateX(-${currentAd * 100}%)`;
 }, 3000);
