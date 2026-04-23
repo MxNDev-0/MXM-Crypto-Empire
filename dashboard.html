@@ -44,6 +44,18 @@
       gap: 8px;
     }
 
+    /* ================= LANGUAGE SELECTOR ================= */
+    .lang-select {
+      background: #0b132b;
+      color: white;
+      border: 1px solid #5bc0be;
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      outline: none;
+    }
+
     /* ================= MENU ================= */
     .menu {
       display: none;
@@ -120,7 +132,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
-    /* ================= DISCOVER (CLEAN UI) ================= */
+    /* ================= DISCOVER ================= */
     #discoverBox .card {
       cursor: pointer;
       padding: 10px;
@@ -142,16 +154,6 @@
       opacity: 0.8;
     }
 
-    /* ================= NOTIFY BADGE ================= */
-    .badge {
-      background: red;
-      color: white;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 50%;
-      margin-left: 4px;
-    }
-
   </style>
 </head>
 
@@ -167,7 +169,18 @@
   <div class="nav-title">MCN Engine</div>
 
   <div class="nav-right">
-    <button onclick="logout()">Logout</button>
+
+    <!-- 🌍 LANGUAGE SELECTOR (REPLACED LOGOUT HERE) -->
+    <select class="lang-select" onchange="setLanguage(this.value)">
+      <option value="en">🇬🇧 English</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="pt">🇵🇹 Português</option>
+      <option value="ar">🇸🇦 العربية</option>
+      <option value="zh">🇨🇳 中文</option>
+    </select>
+
   </div>
 </div>
 
@@ -187,9 +200,6 @@
   <button onclick="goAdmin()">🔐 Admin</button>
   <button onclick="logout()">🚪 Logout</button>
 </div>
-
-<!-- NOTIFICATIONS -->
-<div id="notifPanel" class="menu" style="right:10px;left:auto;"></div>
 
 <!-- MAIN -->
 <div class="container">
@@ -223,30 +233,48 @@
 
 </div>
 
-<!-- JS -->
 <script type="module" src="dashboard.js"></script>
 
 <script>
-/* ================= MENU TOGGLE FIX ================= */
+/* ================= MENU ================= */
 window.toggleMenu = function () {
   document.getElementById("menu").classList.toggle("active");
 };
 
-/* ================= DISCOVER FIXED (NO 404 CRASH) ================= */
+/* ================= LANGUAGE SYSTEM ================= */
+window.setLanguage = function(lang) {
+  localStorage.setItem("mcn_lang", lang);
+
+  const map = {
+    en: "MCN Engine",
+    fr: "Moteur MCN",
+    es: "Motor MCN",
+    de: "MCN Motor",
+    pt: "Motor MCN",
+    ar: "محرك MCN",
+    zh: "MCN 引擎"
+  };
+
+  document.querySelector(".nav-title").innerText = map[lang] || "MCN Engine";
+};
+
+/* restore language */
+(function(){
+  const saved = localStorage.getItem("mcn_lang") || "en";
+  const select = document.querySelector(".lang-select");
+  if (select) select.value = saved;
+  window.setLanguage(saved);
+})();
+
+/* ================= DISCOVER ================= */
 async function loadDiscover() {
   const box = document.getElementById("discoverBox");
 
   try {
     const res = await fetch("https://mxm-backend.onrender.com/blog/list");
-
-    if (!res.ok) throw new Error("API error");
+    if (!res.ok) throw new Error();
 
     const data = await res.json();
-
-    if (!Array.isArray(data) || data.length === 0) {
-      box.innerHTML = "No new posts yet 🚀";
-      return;
-    }
 
     box.innerHTML = "";
 
@@ -254,35 +282,30 @@ async function loadDiscover() {
       box.innerHTML += `
         <div class="card" onclick="openPost('${post.id}')">
           ${post.image ? `<img src="${post.image}">` : ""}
-
           <div class="card-title">${post.title}</div>
           <div class="card-text">${(post.content || "").substring(0,120)}...</div>
         </div>
       `;
     });
 
-  } catch (err) {
-    box.innerHTML = "⚠️ Discover feed unavailable";
+  } catch {
+    box.innerHTML = "⚠️ Discover unavailable";
   }
 }
 
-/* ================= ROUTING FIX ================= */
 function openPost(id) {
-  window.location.href = "blog/post.html?id=" + encodeURIComponent(id);
+  window.location.href = "blog/post.html?id=" + id;
 }
 
-/* ================= INIT ================= */
 loadDiscover();
 
-/* ================= ADS SLIDER FIX (CENTER + PAUSE) ================= */
-let index = 0;
-
+/* ================= ADS SLIDER ================= */
+let i = 0;
 setInterval(() => {
-  const slider = document.getElementById("adsSlider");
-  if (!slider) return;
-
-  index = (index + 1) % slider.children.length;
-  slider.style.transform = `translateX(-${index * 100}%)`;
+  const s = document.getElementById("adsSlider");
+  if (!s) return;
+  i = (i + 1) % s.children.length;
+  s.style.transform = `translateX(-${i * 100}%)`;
 }, 3500);
 
 </script>
