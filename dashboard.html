@@ -14,7 +14,7 @@
       color: white;
     }
 
-    /* NAVBAR */
+    /* ================= NAVBAR ================= */
     .navbar {
       display: flex;
       align-items: center;
@@ -34,7 +34,7 @@
       font-size: 18px;
     }
 
-    /* MENU */
+    /* ================= MENU ================= */
     .menu {
       display: none;
       flex-direction: column;
@@ -60,7 +60,7 @@
       cursor: pointer;
     }
 
-    /* CONTAINER */
+    /* ================= CONTAINER ================= */
     .container {
       padding: 10px;
     }
@@ -72,7 +72,7 @@
       border-radius: 10px;
     }
 
-    /* ================= ADS (FIXED CENTERED) ================= */
+    /* ================= ADS ================= */
     .ads-container {
       overflow: hidden;
       position: relative;
@@ -92,18 +92,24 @@
       align-items: center;
     }
 
+    /* 🔵 RESTORED BLUE BOX */
     .ad-box {
       width: 80%;
       max-width: 300px;
       text-align: center;
-      padding: 12px;
-      background: #0b132b;
-      border-radius: 10px;
+      padding: 14px;
+
+      background: linear-gradient(135deg, #5bc0be, #3a86ff);
+      color: #000;
+      border-radius: 12px;
       font-size: 13px;
+      font-weight: bold;
+
       margin: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
-    /* DISCOVER */
+    /* ================= DISCOVER ================= */
     #discoverBox .card {
       cursor: pointer;
     }
@@ -129,7 +135,6 @@
 
 <!-- MENU -->
 <div id="menu" class="menu">
-
   <button onclick="goHome()">🏠 Home</button>
   <button onclick="goProfile()">👤 Profile</button>
   <button onclick="goMessages()">💬 Messages</button>
@@ -138,13 +143,11 @@
   <button onclick="goFaq()">❓ FAQ</button>
   <button onclick="goAbout()">ℹ️ About</button>
 
-  <!-- NEW -->
   <button onclick="toggleNotif()">🔔 Notifications</button>
   <button onclick="donate()">💰 Donate</button>
 
   <button onclick="goAdmin()">🔐 Admin</button>
   <button onclick="logout()">🚪 Logout</button>
-
 </div>
 
 <!-- NOTIFICATION PANEL -->
@@ -192,7 +195,6 @@
 
 <script type="module" src="dashboard.js"></script>
 
-<!-- DISCOVER SCRIPT -->
 <script>
 async function loadDiscover() {
   const box = document.getElementById("discoverBox");
