@@ -2,9 +2,10 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
-  doc, setDoc, addDoc, collection,
-  onSnapshot, deleteDoc, updateDoc,
-  query, orderBy, getDocs, writeBatch, getDoc
+  doc, addDoc, collection,
+  onSnapshot, deleteDoc,
+  query, orderBy, getDocs,
+  writeBatch, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ================= ADMIN GUARD ================= */
@@ -20,7 +21,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-/* ================= MONITOR ENGINE (UPGRADED) ================= */
+/* ================= MONITOR ================= */
 function log(msg) {
   const box = document.getElementById("monitor");
   if (!box) return;
@@ -30,39 +31,56 @@ function log(msg) {
   box.scrollTop = box.scrollHeight;
 }
 
-/* ================= NOTIFICATION LAYER (NEW) ================= */
-function notify(type, msg) {
-  log(`🔔 [${type}] ${msg}`);
-}
-
 /* ================= BLOG ================= */
 window.createBlog = async () => {
-  const title = blogTitle.value;
-  const content = blogContent.value;
-  const image = blogImage.value;
+  const title = document.getElementById("blogTitle").value;
+  const content = document.getElementById("blogContent").value;
+  const image = document.getElementById("blogImage").value;
 
   if (!title || !content) return alert("Fill fields");
 
-  const res = await fetch("https://mxm-backend.onrender.com/blog/create", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ title, content, image })
-  });
+  try {
+    const res = await fetch("https://mxm-backend.onrender.com/blog/create", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ title, content, image })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (data.success) {
-    alert("Blog posted ✅");
+    if (data.success) {
+      alert("Blog posted ✅");
 
-    blogTitle.value = "";
-    blogContent.value = "";
-    blogImage.value = "";
+      // ✅ CLEAR INPUTS (FIX)
+      document.getElementById("blogTitle").value = "";
+      document.getElementById("blogContent").value = "";
+      document.getElementById("blogImage").value = "";
 
-    notify("BLOG", "New blog published: " + title);
+      log("Blog created: " + title);
+    }
+
+  } catch (e) {
+    alert("Error posting blog");
   }
 };
 
-/* ================= AD REQUESTS (UPGRADED FLOW) ================= */
+/* ================= USERS ================= */
+function loadUsers() {
+  const box = document.getElementById("usersList");
+
+  onSnapshot(collection(db, "onlineUsers"), (snap) => {
+    box.innerHTML = "";
+
+    snap.forEach(d => {
+      const u = d.data();
+      box.innerHTML += `
+        <div class="item">${u.email || "user"}</div>
+      `;
+    });
+  });
+}
+
+/* ================= AD REQUESTS ================= */
 function loadAdRequests() {
   const box = document.getElementById("upgradeList");
 
@@ -75,52 +93,12 @@ function loadAdRequests() {
       box.innerHTML += `
         <div class="item">
           <b>${ad.title}</b><br>
-          ${ad.email || ""}<br>
-          Status: ${ad.status || "pending"}<br><br>
-
-          <button onclick="approveAd('${d.id}')">Approve</button>
-          <button onclick="rejectAd('${d.id}')">Reject</button>
+          Status: ${ad.status || "pending"}
         </div>
       `;
     });
 
     document.getElementById("statRequests").innerText = snap.size;
-  });
-}
-
-window.approveAd = async (id) => {
-  await updateDoc(doc(db, "adRequests", id), {
-    status: "approved",
-    approvedAt: Date.now()
-  });
-
-  notify("AD", "Approved request " + id);
-};
-
-window.rejectAd = async (id) => {
-  await updateDoc(doc(db, "adRequests", id), {
-    status: "rejected"
-  });
-
-  notify("AD", "Rejected request " + id);
-};
-
-/* ================= USERS ================= */
-function loadUsers() {
-  const box = document.getElementById("usersList");
-
-  onSnapshot(collection(db, "onlineUsers"), (snap) => {
-    box.innerHTML = "";
-
-    snap.forEach(d => {
-      const u = d.data();
-
-      box.innerHTML += `
-        <div class="item">${u.email || "user"}</div>
-      `;
-    });
-
-    document.getElementById("statUsers").innerText = snap.size;
   });
 }
 
@@ -157,6 +135,20 @@ window.clearAllPosts = async () => {
 
   await batch.commit();
   log("All posts cleared");
+};
+
+/* ================= ANALYTICS ================= */
+window.loadStats = async () => {
+  const blogs = await getDocs(collection(db, "blogs"));
+  const ads = await getDocs(collection(db, "ads"));
+
+  let clicks = 0;
+  ads.forEach(d => clicks += d.data().clicks || 0);
+
+  document.getElementById("statViews").innerText = blogs.size;
+  document.getElementById("statClicks").innerText = clicks;
+
+  log("Stats refreshed");
 };
 
 /* ================= INIT ================= */
