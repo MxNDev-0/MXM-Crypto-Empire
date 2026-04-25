@@ -7,13 +7,6 @@ import {
   query, orderBy, getDocs, writeBatch, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= PUSH IMPORT ================= */
-import {
-  getMessaging,
-  getToken,
-  onMessage
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
-
 /* ================= EMAILJS (SAFE LOAD) ================= */
 const script = document.createElement("script");
 script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js";
@@ -23,6 +16,56 @@ script.onload = () => {
   emailjs.init("X26w77fp9rDGN2et7");
   log("📧 EmailJS ready");
 };
+
+/* ================= FIREBASE PUSH ================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getMessaging,
+  getToken,
+  onMessage
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAu8BaL9NV6NU_oKSy-pxh89TuVrovZzaE",
+  authDomain: "ai-saas-business-ecfab.firebaseapp.com",
+  projectId: "ai-saas-business-ecfab",
+  storageBucket: "ai-saas-business-ecfab.firebasestorage.app",
+  messagingSenderId: "568523173235",
+  appId: "1:568523173235:web:b714d052976268f1e72906"
+};
+
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+
+/* ================= REQUEST PERMISSION ================= */
+async function enablePush() {
+  try {
+    const permission = await Notification.requestPermission();
+
+    if (permission === "granted") {
+      const token = await getToken(messaging, {
+        vapidKey: "BMtRVhjhwqYJ9Gn5Imp5ZuqdeY_N4lX9mUiGg9uJoHl3-kH2b5vXTG6cp1zAtAxZe3eOLviglmOklScCIBWFIm4"
+      });
+
+      log("🔔 Push enabled");
+      log("📱 TOKEN: " + token);
+    } else {
+      log("❌ Notification denied");
+    }
+  } catch (err) {
+    console.error(err);
+    log("❌ Push error");
+  }
+}
+
+/* ================= LISTEN FOR PUSH ================= */
+onMessage(messaging, (payload) => {
+  log("📩 Push received: " + payload.notification.title);
+
+  new Notification(payload.notification.title, {
+    body: payload.notification.body
+  });
+});
 
 /* ================= EMAIL FUNCTION ================= */
 function sendEmail(message) {
@@ -35,75 +78,14 @@ function sendEmail(message) {
     message: message,
     time: new Date().toLocaleString()
   })
-  .then(() => log("📩 Email sent"))
+  .then(() => {
+    log("📩 Email sent");
+  })
   .catch(err => {
     console.error(err);
     log("❌ Email failed");
   });
 }
-
-/* ================= SERVICE WORKER ================= */
-async function registerSW() {
-  if ("serviceWorker" in navigator) {
-    try {
-      const reg = await navigator.serviceWorker.register("./firebase-messaging-sw.js");
-      log("✅ Service Worker registered");
-      return reg;
-    } catch (err) {
-      console.error(err);
-      log("❌ SW registration failed");
-    }
-  }
-}
-
-/* ================= PUSH SYSTEM ================= */
-async function initPush() {
-  try {
-    log("🔄 Starting push...");
-
-    const permission = await Notification.requestPermission();
-    log("Permission: " + permission);
-
-    if (permission !== "granted") {
-      log("❌ Notification denied");
-      return;
-    }
-
-    await registerSW();
-
-    const messaging = getMessaging();
-
-    const token = await getToken(messaging, {
-      vapidKey: "BMtRVhjhwqYJ9Gn5Imp5ZuqdeY_N4lX9mUiGg9uJoHl3-kH2b5vXTG6cp1zAtAxZe3eOLviglmOklScCIBWFIm4"
-    });
-
-    if (token) {
-      log("🔔 Push ready");
-
-      await setDoc(doc(db, "adminTokens", "main"), {
-        token: token
-      });
-
-    } else {
-      log("❌ No token");
-    }
-
-  } catch (err) {
-    console.error(err);
-    log("❌ Push error: " + err.message);
-  }
-}
-
-/* ================= FOREGROUND PUSH ================= */
-const messaging = getMessaging();
-onMessage(messaging, (payload) => {
-  log("🔔 " + payload.notification.title);
-
-  alert(
-    payload.notification.title + "\n" +
-    payload.notification.body
-  );
-});
 
 /* ================= ADMIN GUARD ================= */
 onAuthStateChanged(auth, async (user) => {
@@ -118,8 +100,8 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     log("Admin logged in");
 
-    // 🔥 START PUSH
-    initPush();
+    // 🔔 ENABLE PUSH HERE
+    enablePush();
   }
 });
 
@@ -157,7 +139,6 @@ window.createBlog = async () => {
     blogImage.value = "";
 
     log("Blog created: " + title);
-
     sendEmail("New blog created: " + title);
   }
 };
@@ -251,7 +232,9 @@ function loadSuggestions() {
       const s = d.data();
 
       box.innerHTML += `
-        <div class="item">💡 ${s.text || "No text"}</div>
+        <div class="item">
+          💡 ${s.text || "No text"}
+        </div>
       `;
     });
   });
