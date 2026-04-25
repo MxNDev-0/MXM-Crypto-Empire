@@ -11,7 +11,7 @@ window.signup = async function () {
 
   try {
     await createUserWithEmailAndPassword(auth, email, password);
-    alert("Account created!");
+    alert("Account created successfully");
     window.location.href = "dashboard.html";
   } catch (err) {
     alert(err.message);
@@ -24,7 +24,7 @@ window.login = async function () {
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    alert("Login successful!");
+    alert("Login successful");
     window.location.href = "dashboard.html";
   } catch (err) {
     alert(err.message);
