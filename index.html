@@ -38,7 +38,6 @@
       color: #5bc0be;
     }
 
-    /* ✅ PROFILE ICON (CIRCLE STYLE) */
     .profile-btn {
       width: 35px;
       height: 35px;
@@ -64,7 +63,12 @@
       border-bottom: 1px solid #333;
     }
 
-    /* ================= BLOG FEED ================= */
+    /* ================= FEATURED ================= */
+    .featured {
+      padding: 15px;
+    }
+
+    /* ================= FEED ================= */
     .feed {
       padding: 15px;
     }
@@ -74,6 +78,12 @@
       padding: 12px;
       border-radius: 10px;
       margin-bottom: 12px;
+      cursor: pointer;
+    }
+
+    .post:hover {
+      transform: scale(1.02);
+      transition: 0.2s;
     }
 
     /* ================= LOGIN POPUP ================= */
@@ -123,6 +133,20 @@
       border: 1px solid #5bc0be;
       color: #5bc0be;
     }
+
+    /* ================= FOOTER ================= */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 40px;
+    }
+
+    .footer a {
+      color: #5bc0be;
+      text-decoration: none;
+    }
   </style>
 </head>
 
@@ -135,7 +159,6 @@
     <div class="logo">MCN Engine</div>
   </div>
 
-  <!-- ✅ PROFILE BUTTON -->
   <div class="profile-btn" onclick="openLogin()">👤</div>
 </div>
 
@@ -147,9 +170,11 @@
   <div>Settings</div>
 </div>
 
+<!-- ================= FEATURED ================= -->
+<div class="featured" id="featuredPost"></div>
+
 <!-- ================= BLOG FEED ================= -->
 <div class="feed" id="feed">
-  <!-- Posts will appear here -->
   <div class="post">Loading posts...</div>
 </div>
 
@@ -168,12 +193,19 @@
   </div>
 </div>
 
+<!-- ================= FOOTER ================= -->
+<div class="footer">
+  <a href="about.html">About</a> |
+  <a href="faq.html">FAQ</a> |
+  <a href="privacy.html">Privacy</a> |
+  <a href="terms.html">Terms</a> |
+  <a href="ads.html">Advertising</a>
+  <br><br>
+  © MCN Engine
+</div>
+
 <!-- ================= SCRIPT ================= -->
 <script type="module">
-import { db } from "./firebase.js";
-import {
-  collection, getDocs, query, orderBy
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* MENU */
 window.toggleMenu = function(){
@@ -181,7 +213,7 @@ window.toggleMenu = function(){
   menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
-/* LOGIN MODAL */
+/* LOGIN */
 window.openLogin = function(){
   document.getElementById("loginModal").style.display = "flex";
 }
@@ -190,29 +222,55 @@ window.closeLogin = function(){
   document.getElementById("loginModal").style.display = "none";
 }
 
-/* LOAD BLOG POSTS */
+/* OPEN POST */
+window.openPost = function(id){
+  window.location.href = `post.html?id=${id}`;
+}
+
+/* LOAD POSTS FROM BACKEND */
 async function loadFeed(){
-  const box = document.getElementById("feed");
-  box.innerHTML = "";
+  const feed = document.getElementById("feed");
+  const featuredBox = document.getElementById("featuredPost");
 
-  const snap = await getDocs(query(collection(db, "blogs"), orderBy("time", "desc")));
+  try {
+    const res = await fetch("https://mxm-backend.onrender.com/blog/list");
+    const posts = await res.json();
 
-  snap.forEach(doc => {
-    const p = doc.data();
+    feed.innerHTML = "";
 
-    box.innerHTML += `
-      <div class="post">
-        <h4>${p.title || "No title"}</h4>
-        <p>${p.content?.slice(0,100) || ""}...</p>
+    if (!posts.length) {
+      feed.innerHTML = "<div class='post'>No posts found</div>";
+      return;
+    }
+
+    /* FEATURED */
+    const featured = posts[0];
+    featuredBox.innerHTML = `
+      <div class="post" onclick="openPost('${featured.id}')" style="border:2px solid #5bc0be">
+        <h3>🔥 Featured</h3>
+        <h4>${featured.title}</h4>
+        ${featured.image ? `<img src="${featured.image}" style="width:100%;border-radius:10px;margin-top:10px">` : ""}
       </div>
     `;
-  });
+
+    /* FEED */
+    posts.forEach(p => {
+      feed.innerHTML += `
+        <div class="post" onclick="openPost('${p.id}')">
+          <h4>${p.title}</h4>
+          <p>${(p.content || "").slice(0,100)}...</p>
+        </div>
+      `;
+    });
+
+  } catch (err) {
+    feed.innerHTML = "<div class='post'>Failed to load posts</div>";
+  }
 }
 
 loadFeed();
-</script>
 
-<script type="module" src="app.js"></script>
+</script>
 
 </body>
 </html>
