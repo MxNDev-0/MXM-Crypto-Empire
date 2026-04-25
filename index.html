@@ -1,61 +1,107 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>MCN Engine V15 — Monetization Control Network</title>
+  <title>MCN Engine — Monetization Control Network</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
 
   <style>
     body {
-      background: #0b132b;
-      color: #fff;
-      font-family: Arial, sans-serif;
       margin: 0;
+      font-family: Arial;
+      background: #0b132b;
+      color: white;
     }
 
-    .login-wrapper {
+    /* HEADER */
+    .header {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .center-box {
+      padding: 15px;
       background: #1c2541;
-      padding: 25px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 380px;
-      text-align: center;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
     }
 
     .logo {
-      font-size: 32px;
+      font-size: 22px;
       font-weight: bold;
       color: #5bc0be;
-      margin-bottom: 10px;
     }
 
-    h2 {
-      margin: 10px 0;
-    }
-
-    .subtext {
-      opacity: 0.7;
-      font-size: 14px;
-      margin-bottom: 15px;
-    }
-
-    .benefits {
-      text-align: left;
-      font-size: 13px;
-      margin-bottom: 15px;
-      line-height: 1.6;
-      background: #0b132b;
-      padding: 10px;
+    .login-btn {
+      background: #5bc0be;
+      border: none;
+      padding: 8px 12px;
       border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* FEATURED */
+    .featured {
+      margin: 10px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .featured img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .featured-title {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    /* BLOG LIST */
+    .feed {
+      padding: 10px;
+    }
+
+    .card {
+      display: flex;
+      gap: 10px;
+      background: #1c2541;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .card img {
+      width: 90px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    /* LOGIN MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-box {
+      background: #1c2541;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 350px;
     }
 
     input {
@@ -64,7 +110,6 @@
       margin: 6px 0;
       border-radius: 8px;
       border: none;
-      outline: none;
       background: #0b132b;
       color: white;
     }
@@ -72,63 +117,113 @@
     button {
       width: 100%;
       padding: 10px;
-      margin-top: 8px;
+      margin-top: 6px;
       border-radius: 8px;
+      border: none;
       background: #5bc0be;
-      color: #000;
       font-weight: bold;
       cursor: pointer;
-      border: none;
     }
 
-    .secondary-btn {
-      background: transparent;
-      border: 1px solid #5bc0be;
+    /* FOOTER */
+    .footer {
+      padding: 20px;
+      text-align: center;
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    .footer a {
       color: #5bc0be;
-    }
-
-    .footer-note {
-      font-size: 12px;
-      opacity: 0.6;
-      margin-top: 10px;
+      margin: 0 5px;
+      text-decoration: none;
     }
   </style>
 </head>
 
 <body>
 
-<div class="login-wrapper">
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">MCN Engine</div>
+  <button class="login-btn" onclick="openLogin()">Login</button>
+</div>
 
-  <div class="center-box">
+<!-- FEATURED -->
+<div id="featured" class="featured"></div>
 
-    <div class="logo">MCN</div>
+<!-- FEED -->
+<div id="feed" class="feed"></div>
 
-    <h2>MCN Engine V15</h2>
-    <p class="subtext">Monetization Control Network</p>
-
-    <!-- 🔥 VALUE SECTION -->
-    <div class="benefits">
-      💰 Earn from ads & content<br>
-      💬 Access real-time community feed<br>
-      📢 Buy ad space & promote business<br>
-    </div>
-
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal">
+  <div class="modal-box">
+    <h3>Login</h3>
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
-
     <button onclick="signup()">Create Account</button>
-    <button class="secondary-btn" onclick="login()">Login</button>
-
-    <p id="message"></p>
-
-    <div class="footer-note">
-      Powered by MCN Engine • Build. Earn. Scale.
-    </div>
-
+    <button onclick="login()">Login</button>
+    <button onclick="closeLogin()">Close</button>
   </div>
+</div>
 
+<!-- FOOTER -->
+<div class="footer">
+  <a href="about.html">About</a> |
+  <a href="faq.html">FAQ</a> |
+  <a href="privacy.html">Privacy</a> |
+  <a href="terms.html">Terms</a> |
+  <a href="ads.html">Advertising</a>
+  <br><br>
+  © MCN Engine
 </div>
 
 <script type="module" src="app.js"></script>
+
+<script>
+function openLogin(){
+  document.getElementById("loginModal").style.display = "flex";
+}
+
+function closeLogin(){
+  document.getElementById("loginModal").style.display = "none";
+}
+
+/* FETCH BLOGS */
+async function loadBlogs(){
+  try {
+    const res = await fetch("https://mxm-backend.onrender.com/blog/all");
+    const blogs = await res.json();
+
+    if (!blogs.length) return;
+
+    // FEATURED
+    const f = blogs[0];
+    document.getElementById("featured").innerHTML = `
+      <img src="${f.image || 'https://via.placeholder.com/400'}">
+      <div class="featured-title">${f.title}</div>
+    `;
+
+    // FEED
+    let html = "";
+    blogs.slice(1).forEach(b => {
+      html += `
+        <div class="card">
+          <img src="${b.image || 'https://via.placeholder.com/150'}">
+          <div class="card-title">${b.title}</div>
+        </div>
+      `;
+    });
+
+    document.getElementById("feed").innerHTML = html;
+
+  } catch(err){
+    console.error(err);
+  }
+}
+
+loadBlogs();
+</script>
+
 </body>
 </html>
