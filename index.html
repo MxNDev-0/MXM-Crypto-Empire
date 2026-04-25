@@ -64,12 +64,11 @@
       cursor: pointer;
     }
 
-    /* FEATURED */
+    /* BLOG */
     .featured {
       padding: 15px;
     }
 
-    /* FEED */
     .feed {
       padding: 15px;
     }
@@ -165,10 +164,10 @@
 
 <!-- MENU -->
 <div id="menu">
-  <div>Home</div>
-  <div>Trending</div>
-  <div>Dashboard</div>
-  <div>Settings</div>
+  <div onclick="goHome()">Home</div>
+  <div onclick="goTrending()">Trending</div>
+  <div onclick="goDashboard()">Dashboard</div>
+  <div onclick="goSettings()">Settings</div>
 </div>
 
 <!-- FEATURED -->
@@ -205,32 +204,27 @@
 
 <script type="module">
 
-/* ================= MENU (SAFE TOGGLE) ================= */
+/* ================= MENU TOGGLE ================= */
 window.toggleMenu = function () {
   const menu = document.getElementById("menu");
-  if (!menu) return;
-
   menu.style.display = (menu.style.display === "block") ? "none" : "block";
 };
 
 /* ================= LOGIN MODAL ================= */
 window.openLogin = function () {
-  const modal = document.getElementById("loginModal");
-  if (modal) modal.style.display = "flex";
+  document.getElementById("loginModal").style.display = "flex";
 };
 
 window.closeLogin = function () {
-  const modal = document.getElementById("loginModal");
-  if (modal) modal.style.display = "none";
+  document.getElementById("loginModal").style.display = "none";
 };
 
-/* ================= BLOG ROUTING FIX (CRITICAL 404 FIX) ================= */
+/* ================= BLOG ROUTE FIX ================= */
 window.openPost = function (id) {
-  // IMPORTANT: safe relative path for /blog folder setup
   window.location.href = "./blog/post.html?id=" + id;
 };
 
-/* ================= CATEGORY SYSTEM ================= */
+/* ================= CATEGORY COLORS ================= */
 function getCategoryColor(cat) {
   switch (cat) {
     case "Crypto": return "#5bc0be";
@@ -241,112 +235,58 @@ function getCategoryColor(cat) {
   }
 }
 
-/* ================= LOAD BLOG POSTS ================= */
+/* ================= LOAD BLOG ================= */
 async function loadFeed() {
   const feed = document.getElementById("feed");
   const featuredBox = document.getElementById("featuredPost");
 
-  if (!feed) return;
+  const res = await fetch("https://mxm-backend.onrender.com/blog/list");
+  const posts = await res.json();
 
-  try {
-    const res = await fetch("https://mxm-backend.onrender.com/blog/list");
-    const posts = await res.json();
+  feed.innerHTML = "";
 
-    feed.innerHTML = "";
+  const featured = posts.find(p => p.featured) || posts[0];
 
-    if (!posts || posts.length === 0) {
-      feed.innerHTML = `<div class="post">No posts found</div>`;
-      return;
-    }
+  featuredBox.innerHTML = `
+    <div class="post" onclick="openPost('${featured.id}')" style="border:2px solid #5bc0be">
+      <h3>🔥 Featured</h3>
+      <h4>${featured.title}</h4>
+    </div>
+  `;
 
-    /* ================= FEATURED ================= */
-    const featured = posts.find(p => p.featured === true) || posts[0];
-
-    if (featuredBox && featured) {
-      featuredBox.innerHTML = `
-        <div class="post" onclick="openPost('${featured.id}')" style="border:2px solid #5bc0be">
-          <h3>🔥 Featured</h3>
-          <h4>${featured.title}</h4>
-        </div>
-      `;
-    }
-
-    /* ================= FEED ================= */
-    posts.forEach(p => {
-      feed.innerHTML += `
-        <div class="post" onclick="openPost('${p.id}')">
-
-          <small style="color:${getCategoryColor(p.category)}">
-            ${p.category || "General"}
-          </small>
-
-          <h4>${p.title}</h4>
-          <p>${(p.content || "").slice(0, 100)}...</p>
-        </div>
-      `;
-    });
-
-  } catch (err) {
-    console.error(err);
-    feed.innerHTML = `<div class="post">Failed to load posts</div>`;
-  }
-}
-
-/* INIT */
-loadFeed();
-
-</script>
-
-/* ================= LOGIN BUTTON STATE FIX (NO SYSTEM CHANGE) ================= */
-const loginModal = document.getElementById("loginModal");
-
-if (loginModal) {
-  loginModal.addEventListener("click", function (e) {
-    // closes only when clicking outside box
-    if (e.target === loginModal) {
-      loginModal.style.display = "none";
-    }
+  posts.forEach(p => {
+    feed.innerHTML += `
+      <div class="post" onclick="openPost('${p.id}')">
+        <small style="color:${getCategoryColor(p.category)}">
+          ${p.category || "General"}
+        </small>
+        <h4>${p.title}</h4>
+        <p>${(p.content || "").slice(0,100)}...</p>
+      </div>
+    `;
   });
 }
 
-/* ================= ENSURE LOGIN FUNCTIONS ARE ACTIVE ================= */
-window.openLogin = window.openLogin || function () {
-  const modal = document.getElementById("loginModal");
-  if (modal) modal.style.display = "flex";
-};
+loadFeed();
 
-window.closeLogin = window.closeLogin || function () {
-  const modal = document.getElementById("loginModal");
-  if (modal) modal.style.display = "none";
-};
-
-/* ================= HAMBURGER MENU ITEM BINDING FIX ================= */
-window.goHome = window.goHome || function () {
+/* ================= MENU FUNCTIONS (FULL FIX INTEGRATED) ================= */
+window.goHome = function () {
   location.href = "index.html";
 };
 
-window.goDashboard = window.goDashboard || function () {
+window.goTrending = function () {
+  document.getElementById("featuredPost")?.scrollIntoView({ behavior: "smooth" });
+};
+
+window.goDashboard = function () {
   location.href = "dashboard.html";
 };
 
-window.goTrending = window.goTrending || function () {
-  const el = document.getElementById("featuredPost");
-  if (el) el.scrollIntoView({ behavior: "smooth" });
-};
-
-window.goSettings = window.goSettings || function () {
+window.goSettings = function () {
   alert("Settings page coming soon");
 };
 
-/* ================= ENSURE MENU ITEMS WORK EVEN IF HTML WAS STATIC ================= */
-document.querySelectorAll("#menu div").forEach((item) => {
-  const text = item.innerText.toLowerCase();
-
-  if (text.includes("home")) item.onclick = window.goHome;
-  if (text.includes("dashboard")) item.onclick = window.goDashboard;
-  if (text.includes("trending")) item.onclick = window.goTrending;
-  if (text.includes("settings")) item.onclick = window.goSettings;
-});
+</script>
 
 </body>
 </html>
