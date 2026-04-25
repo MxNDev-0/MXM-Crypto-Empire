@@ -61,6 +61,7 @@
     #menu div {
       padding: 10px;
       border-bottom: 1px solid #333;
+      cursor: pointer;
     }
 
     /* ================= FEATURED ================= */
@@ -86,7 +87,7 @@
       transition: 0.2s;
     }
 
-    /* ================= LOGIN POPUP ================= */
+    /* ================= LOGIN ================= */
     .login-modal {
       display: none;
       position: fixed;
@@ -193,7 +194,7 @@
   </div>
 </div>
 
-<!-- ================= FOOTER ================= -->
+<!-- ================= FOOTER (LEGAL RESTORED) ================= -->
 <div class="footer">
   <a href="about.html">About</a> |
   <a href="faq.html">FAQ</a> |
@@ -222,9 +223,9 @@ window.closeLogin = function(){
   document.getElementById("loginModal").style.display = "none";
 }
 
-/* OPEN POST */
+/* OPEN POST — FIXED PATH (IMPORTANT) */
 window.openPost = function(id){
-  window.location.href = `post.html?id=${id}`;
+  window.location.href = "/blog/post.html?id=" + id;
 }
 
 /* LOAD POSTS FROM BACKEND */
@@ -238,13 +239,14 @@ async function loadFeed(){
 
     feed.innerHTML = "";
 
-    if (!posts.length) {
+    if (!posts || posts.length === 0) {
       feed.innerHTML = "<div class='post'>No posts found</div>";
       return;
     }
 
     /* FEATURED */
     const featured = posts[0];
+
     featuredBox.innerHTML = `
       <div class="post" onclick="openPost('${featured.id}')" style="border:2px solid #5bc0be">
         <h3>🔥 Featured</h3>
