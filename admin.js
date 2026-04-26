@@ -1,4 +1,6 @@
 import { auth, db } from "./firebase.js";
+import { app } from "./firebase.js"; // ✅ IMPORTANT (use same app)
+
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
@@ -17,24 +19,13 @@ script.onload = () => {
   log("📧 EmailJS ready");
 };
 
-/* ================= FIREBASE PUSH ================= */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+/* ================= FIREBASE PUSH (FIXED) ================= */
 import {
   getMessaging,
   getToken,
   onMessage
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAu8BaL9NV6NU_oKSy-pxh89TuVrovZzaE",
-  authDomain: "ai-saas-business-ecfab.firebaseapp.com",
-  projectId: "ai-saas-business-ecfab",
-  storageBucket: "ai-saas-business-ecfab.firebasestorage.app",
-  messagingSenderId: "568523173235",
-  appId: "1:568523173235:web:b714d052976268f1e72906"
-};
-
-const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 /* ================= REQUEST PERMISSION ================= */
@@ -48,7 +39,15 @@ async function enablePush() {
       });
 
       log("🔔 Push enabled");
-      log("📱 TOKEN: " + token);
+
+      // ✅ SAVE TOKEN TO FIRESTORE
+      await setDoc(doc(db, "pushTokens", auth.currentUser.uid), {
+        token: token,
+        time: Date.now()
+      });
+
+      log("📱 Token saved");
+
     } else {
       log("❌ Notification denied");
     }
@@ -100,7 +99,7 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     log("Admin logged in");
 
-    // 🔔 ENABLE PUSH HERE
+    // 🔔 ENABLE PUSH AFTER LOGIN
     enablePush();
   }
 });
@@ -139,6 +138,7 @@ window.createBlog = async () => {
     blogImage.value = "";
 
     log("Blog created: " + title);
+
     sendEmail("New blog created: " + title);
   }
 };
