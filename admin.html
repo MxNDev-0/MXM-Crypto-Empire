@@ -87,7 +87,6 @@
       font-family: monospace;
       padding: 10px;
       border-radius: 8px;
-      box-sizing: border-box;
     }
   </style>
 </head>
@@ -113,13 +112,11 @@
     <button onclick="createBlog()">Publish Blog</button>
   </div>
 
-  <!-- 🔔 BROADCAST SYSTEM (NEW) -->
+  <!-- BROADCAST -->
   <div class="card">
     <h3>🔔 Broadcast System</h3>
-
     <input id="broadcastTitle" placeholder="Broadcast Title">
     <textarea id="broadcastMessage" placeholder="Broadcast Message"></textarea>
-
     <button onclick="sendBroadcast()">Send Broadcast</button>
   </div>
 
@@ -156,7 +153,8 @@
 
 </div>
 
-<script type="module" src="/admin.js"></script>
+<!-- 🔥 FIXED PATH (THIS IS THE IMPORTANT PART) -->
+<script type="module" src="./admin.js"></script>
 
 </body>
 </html>
