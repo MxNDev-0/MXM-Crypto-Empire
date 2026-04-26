@@ -15,17 +15,12 @@ import {
   writeBatch
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= MONITOR CORE (SAFE + FIXED) ================= */
+/* ================= MONITOR CORE (NEVER FAILS) ================= */
 function log(msg) {
   const box = document.getElementById("monitor");
-
-  if (!box) {
-    console.warn("MONITOR NOT FOUND:", msg);
-    return;
-  }
+  if (!box) return;
 
   const time = new Date().toLocaleTimeString();
-
   const line = document.createElement("div");
   line.textContent = `[${time}] ${msg}`;
 
@@ -33,59 +28,71 @@ function log(msg) {
   box.scrollTop = box.scrollHeight;
 }
 
-/* ================= BOOT ================= */
+/* ================= SAFE BOOT (ALWAYS RUNS) ================= */
 window.addEventListener("DOMContentLoaded", () => {
   const box = document.getElementById("monitor");
 
-  if (box) {
-    box.innerHTML = "🟢 MCN Admin Booting...";
-  }
-
-  setTimeout(() => {
-    log("🚀 System ready");
-    log("🖥 Monitor online");
-    log("🔐 Waiting for admin auth...");
-  }, 500);
-});
-
-/* ================= AUTH GUARD ================= */
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    log("❌ No user → redirecting");
-    location.href = "index.html";
+  if (!box) {
+    console.error("❌ Monitor element missing");
     return;
   }
 
-  try {
-    const snap = await getDoc(doc(db, "users", user.uid));
+  box.innerHTML = "🟢 MCN Admin Booting...";
+  log("📡 DOM ready");
+  log("🖥 Monitor initialized");
 
+  // failsafe so you ALWAYS see something
+  setTimeout(() => {
+    log("⏳ Waiting for authentication...");
+  }, 500);
+});
+
+/* ================= AUTH SYSTEM (FIXED SAFE VERSION) ================= */
+onAuthStateChanged(auth, async (user) => {
+  try {
+    const box = document.getElementById("monitor");
+
+    if (!box) return;
+
+    if (!user) {
+      log("❌ No user detected → redirecting");
+      location.href = "index.html";
+      return;
+    }
+
+    log("🔐 User detected, verifying admin...");
+
+    const snap = await getDoc(doc(db, "users", user.uid));
     const role = snap.exists() ? snap.data().role : "user";
 
     if (role !== "admin") {
+      log("⛔ Access denied (not admin)");
       alert("Access denied");
       location.href = "dashboard.html";
       return;
     }
 
-    log("🔐 Admin logged in");
+    log("✅ Admin verified");
+    log("🚀 System online");
 
-    startAdminSystem();
+    startSystem();
 
   } catch (err) {
     console.error(err);
-    log("❌ Auth check failed");
+    log("❌ Auth error (Firestore or network issue)");
   }
 });
 
 /* ================= SYSTEM START ================= */
-function startAdminSystem() {
+function startSystem() {
   loadUsers();
   loadPosts();
   loadAdRequests();
-  log("📡 Admin modules loaded");
+
+  log("📦 Admin modules loaded");
 }
 
-/* ================= BROADCAST SYSTEM ================= */
+/* ================= BROADCAST ================= */
 window.sendBroadcast = async () => {
   const title = document.getElementById("broadcastTitle");
   const message = document.getElementById("broadcastMessage");
@@ -127,11 +134,7 @@ function loadUsers() {
 
     snap.forEach(d => {
       const u = d.data();
-      box.innerHTML += `
-        <div class="item">
-          👤 ${u.email || "user"}
-        </div>
-      `;
+      box.innerHTML += `<div class="item">👤 ${u.email || "user"}</div>`;
     });
 
     const stat = document.getElementById("statUsers");
@@ -204,8 +207,8 @@ window.loadStats = async () => {
   try {
     const blogs = await getDocs(collection(db, "blogs"));
 
-    const statViews = document.getElementById("statViews");
-    if (statViews) statViews.innerText = blogs.size;
+    const stat = document.getElementById("statViews");
+    if (stat) stat.innerText = blogs.size;
 
     log("📊 Stats updated");
 
