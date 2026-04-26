@@ -13,7 +13,6 @@ import {
   onSnapshot,
   serverTimestamp,
   addDoc,
-  updateDoc,
   query,
   orderBy,
   where
@@ -24,13 +23,12 @@ let userData = null;
 let lastBTC = null;
 let lastETH = null;
 
-/* ================= MONITOR LOGGER ================= */
+/* ================= SAFE MONITOR ================= */
 function monitorLog(msg) {
   const box = document.getElementById("monitor");
   if (!box) return;
 
   const time = new Date().toLocaleTimeString();
-
   const line = document.createElement("div");
   line.textContent = `[${time}] ${msg}`;
 
@@ -38,21 +36,26 @@ function monitorLog(msg) {
   box.scrollTop = box.scrollHeight;
 }
 
-/* ================= CHAT → MONITOR ================= */
+/* ================= SAFE CHAT ================= */
 function loadChatToMonitor() {
-  const q = query(
-    collection(db, "chats/messages"),
-    orderBy("timestamp", "asc")
-  );
+  try {
+    const q = query(
+      collection(db, "chats", "messages"), // ✅ FIXED
+      orderBy("timestamp", "asc")
+    );
 
-  onSnapshot(q, (snapshot) => {
-    snapshot.docChanges().forEach(change => {
-      if (change.type === "added") {
-        const msg = change.doc.data();
-        monitorLog(`💬 ${msg.username}: ${msg.text}`);
-      }
+    onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === "added") {
+          const msg = change.doc.data();
+          monitorLog(`💬 ${msg.username}: ${msg.text}`);
+        }
+      });
     });
-  });
+
+  } catch (err) {
+    console.error("Chat error:", err);
+  }
 }
 
 /* ================= SEND MESSAGE ================= */
@@ -63,17 +66,22 @@ window.sendMessage = async () => {
   const text = input.value.trim();
   if (!text) return;
 
-  await addDoc(collection(db, "chats/messages"), {
-    text,
-    uid: user.uid,
-    username: userData?.username || "User",
-    timestamp: serverTimestamp()
-  });
+  try {
+    await addDoc(collection(db, "chats", "messages"), { // ✅ FIXED
+      text,
+      uid: user.uid,
+      username: userData?.username || "User",
+      timestamp: serverTimestamp()
+    });
 
-  input.value = "";
+    input.value = "";
+
+  } catch (err) {
+    console.error("Send error:", err);
+  }
 };
 
-/* AUTH */
+/* ================= AUTH ================= */
 onAuthStateChanged(auth, async (u) => {
   if (!u) return location.href = "index.html";
 
@@ -85,11 +93,11 @@ onAuthStateChanged(auth, async (u) => {
   loadPrices();
   loadNotifications();
   loadBroadcasts();
-  loadChatToMonitor(); // ✅ CHAT IN MONITOR
+  loadChatToMonitor(); // ✅ SAFE
   startLiveSystem();
 });
 
-/* USER */
+/* ================= USER ================= */
 async function ensureUser() {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
@@ -135,7 +143,7 @@ function loadBroadcasts() {
   });
 }
 
-/* PRICES */
+/* ================= PRICES ================= */
 async function loadPrices() {
   const box = document.getElementById("priceBox");
 
@@ -157,24 +165,20 @@ async function loadPrices() {
 
 function checkPriceChange(data) {
   if (lastBTC && lastETH) {
-    if (data.bitcoin.usd !== lastBTC) {
-      sendNotification("BTC price changed!");
-    }
-    if (data.ethereum.usd !== lastETH) {
-      sendNotification("ETH price changed!");
-    }
+    if (data.bitcoin.usd !== lastBTC) sendNotification("BTC price changed!");
+    if (data.ethereum.usd !== lastETH) sendNotification("ETH price changed!");
   }
 
   lastBTC = data.bitcoin.usd;
   lastETH = data.ethereum.usd;
 }
 
-/* LOOP */
+/* ================= LOOP ================= */
 function startLiveSystem() {
   setInterval(loadPrices, 30000);
 }
 
-/* NOTIFICATIONS */
+/* ================= NOTIFICATIONS ================= */
 function loadNotifications() {
   const panel = document.getElementById("notifPanel");
   const badge = document.getElementById("notifCount");
@@ -196,7 +200,7 @@ function loadNotifications() {
   });
 }
 
-/* SEND NOTIFICATION */
+/* ================= SEND NOTIFICATION ================= */
 async function sendNotification(text) {
   await addDoc(collection(db, "notifications", user.uid, "items"), {
     text,
@@ -205,10 +209,25 @@ async function sendNotification(text) {
   });
 }
 
-/* NAV */
-window.toggleMenu = () => document.getElementById("menu").classList.toggle("active");
+/* ================= MENU ================= */
+window.toggleMenu = function () {
+  document.getElementById("menu").classList.toggle("active");
+};
 
-window.logout = async () => {
+window.logout = async function () {
   await signOut(auth);
   location.href = "index.html";
+};
+
+/* ================= NAV ================= */
+window.goHome = () => location.href = "dashboard.html";
+window.goProfile = () => location.href = "profile.html";
+window.goMessages = () => location.href = "messages.html";
+window.goAdSpace = () => location.href = "ads.html";
+window.goBlog = () => location.href = "blog/index.html";
+window.goFaq = () => location.href = "faq.html";
+window.goAbout = () => location.href = "about.html";
+window.goAdmin = () => {
+  if (!userData || userData.role !== "admin") return alert("Admin only");
+  location.href = "admin.html";
 };
