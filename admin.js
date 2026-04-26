@@ -9,26 +9,7 @@ import {
   query, orderBy, getDocs, writeBatch, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= EMAILJS ================= */
-const script = document.createElement("script");
-script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js";
-document.head.appendChild(script);
-
-script.onload = () => {
-  emailjs.init("X26w77fp9rDGN2et7");
-  log("📧 EmailJS ready");
-};
-
-/* ================= PUSH ================= */
-import {
-  getMessaging,
-  getToken,
-  onMessage
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
-
-const messaging = getMessaging(app);
-
-/* ================= MONITOR FIX (IMPORTANT) ================= */
+/* ================= MONITOR (FIXED FIRST - CRITICAL) ================= */
 function log(msg) {
   const box = document.getElementById("monitor");
 
@@ -43,23 +24,50 @@ function log(msg) {
   line.textContent = `[${time}] ${msg}`;
 
   box.appendChild(line);
-
   box.scrollTop = box.scrollHeight;
 }
 
-/* 🔥 FORCE MONITOR BOOT */
+/* ================= EMAILJS ================= */
+const script = document.createElement("script");
+script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js";
+document.head.appendChild(script);
+
+script.onload = () => {
+  try {
+    emailjs.init("X26w77fp9rDGN2et7");
+    console.log("EmailJS ready");
+  } catch (e) {
+    console.log("EmailJS init failed");
+  }
+};
+
+/* ================= PUSH ================= */
+import {
+  getMessaging,
+  getToken,
+  onMessage
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+let messaging;
+try {
+  messaging = getMessaging(app);
+} catch (e) {
+  console.log("Messaging init skipped");
+}
+
+/* ================= SAFE MONITOR BOOT ================= */
 window.addEventListener("DOMContentLoaded", () => {
   const box = document.getElementById("monitor");
 
   if (box) {
-    box.innerHTML = "🟢 Initializing MCN Engine Admin Monitor...<br>";
+    box.innerHTML = "🟢 Initializing MCN Engine Admin Monitor...";
   }
 
   setTimeout(() => {
     log("🚀 System ready");
     log("🔐 Admin panel active");
     log("📡 Live monitor online");
-  }, 400);
+  }, 500);
 });
 
 /* ================= BROADCAST SYSTEM ================= */
@@ -173,6 +181,7 @@ window.clearAllPosts = async () => {
 /* ================= INIT ================= */
 loadPosts();
 
+/* ================= FINAL MONITOR BOOT (SAFE) ================= */
 setTimeout(() => {
   const box = document.getElementById("monitor");
 
