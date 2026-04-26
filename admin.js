@@ -1,3 +1,5 @@
+document.body.style.background = "red";
+alert("SCRIPT IS RUNNING");
 import { auth, db } from "./firebase.js";
 import { app } from "./firebase.js";
 
