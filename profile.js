@@ -31,18 +31,28 @@ function log(msg) {
   box.scrollTop = box.scrollHeight;
 }
 
+/* ================= CHAT UI TOGGLE ================= */
+window.toggleChatInput = function () {
+  const box = document.getElementById("chatInputBox");
+  if (!box) return;
+
+  box.style.display = box.style.display === "block" ? "none" : "block";
+};
+
 /* ================= AUTH ================= */
 onAuthStateChanged(auth, async (u) => {
   if (!u) location.href = "index.html";
 
   user = u;
 
-  log("🟢 Profile loaded");
+  log("Profile system online");
 
   loadUsername();
   loadFriendRequests();
   loadFriends();
-  loadChatMonitor();
+  loadChat(); // 🔥 CHAT ENABLED IN PROFILE MONITOR
+  loadNotifications();
+  monitorAdRequests();
 });
 
 /* ================= USERNAME ================= */
@@ -76,118 +86,113 @@ window.updateUsername = async () => {
 window.resetPassword = async () => {
   await sendPasswordResetEmail(auth, user.email);
   alert("Reset email sent");
-  log("Password reset sent");
+
+  log("Password reset email sent");
 };
 
-/* ================= 🔥 CHAT SYSTEM (MONITOR CORE) ================= */
-
-const chatRef = collection(db, "chats", "global", "messages");
-
-/* SEND MESSAGE */
+/* ================= 🔥 CHAT SYSTEM (PROFILE MONITOR MERGED) ================= */
 window.sendChat = async () => {
   const input = document.getElementById("chatInput");
+
   if (!input || !input.value.trim()) return;
 
-  try {
-    await addDoc(chatRef, {
-      text: input.value,
-      uid: user.uid,
-      username: user.email.split("@")[0],
-      createdAt: serverTimestamp()
-    });
+  await addDoc(collection(db, "chats"), {
+    text: input.value,
+    uid: user.uid,
+    username: user.email.split("@")[0],
+    createdAt: serverTimestamp()
+  });
 
-    input.value = "";
-
-  } catch (err) {
-    console.error(err);
-  }
+  log("You: " + input.value);
+  input.value = "";
 };
 
-/* LOAD CHAT INTO MONITOR */
-function loadChatMonitor() {
+function loadChat() {
   const box = document.getElementById("monitor");
   if (!box) return;
 
-  onSnapshot(query(chatRef, orderBy("createdAt")), (snap) => {
-    box.innerHTML = "";
+  onSnapshot(collection(db, "chats"), (snap) => {
+    snap.docChanges().forEach(change => {
+      if (change.type === "added") {
+        const m = change.doc.data();
 
-    snap.forEach(d => {
-      const m = d.data();
+        const line = document.createElement("div");
+        line.innerHTML = `💬 <b>${m.username}</b>: ${m.text}`;
 
-      const line = document.createElement("div");
-      line.innerHTML = `
-        💬 <b onclick="openUser('${m.uid}','${m.username}')"
-             style="color:#5bc0be; cursor:pointer;">
-          ${m.username}
-        </b>: ${m.text}
-      `;
-
-      box.appendChild(line);
+        box.appendChild(line);
+        box.scrollTop = box.scrollHeight;
+      }
     });
-
-    box.scrollTop = box.scrollHeight;
   });
 }
 
-loadChatMonitor();
+/* ================= NOTIFICATIONS ================= */
+function loadNotifications() {
+  const ref = collection(db, "notifications", user.uid, "items");
 
-/* USER CLICK (DM HOOK) */
-window.openUser = (uid, name) => {
-  log("Selected user: " + name);
-  // future: open DM popup
-};
+  onSnapshot(query(ref, orderBy("createdAt", "desc")), (snap) => {
+    snap.docChanges().forEach(change => {
+      if (change.type === "added") {
+        const data = change.doc.data();
+        log(data.text || "New notification");
+      }
+    });
+  });
+}
 
-/* ================= ACTIVATE CHAT INPUT ================= */
-window.enableChat = () => {
-  const input = document.getElementById("chatInput");
-  const btn = document.getElementById("sendBtn");
+/* ================= AD REQUEST MONITOR ================= */
+function monitorAdRequests() {
+  const q = query(
+    collection(db, "adRequests"),
+    where("userId", "==", user.uid)
+  );
 
-  if (input) input.style.display = "block";
-  if (btn) btn.style.display = "block";
+  onSnapshot(q, (snap) => {
+    let active = "No active ads";
 
-  input.focus();
-};
+    snap.forEach(d => {
+      const ad = d.data();
 
-/* ================= FRIEND SYSTEM ================= */
+      if (ad.status === "approved") {
+        active = "Active";
+        log("Ad approved");
+      }
+
+      if (ad.status === "rejected") {
+        log("Ad rejected");
+      }
+
+      if (ad.status === "pending") {
+        log("Ad pending");
+      }
+    });
+
+    const el = document.getElementById("adStatus");
+    if (el) el.innerText = active;
+  });
+}
+
+/* ================= FRIEND SYSTEM (UNCHANGED) ================= */
 window.sendFriendRequest = async function (toUid, toName) {
   if (!user || user.uid === toUid) return;
 
   await addDoc(collection(db, "friendRequests"), {
     from: user.uid,
+    fromName: user.email.split("@")[0],
     to: toUid,
+    toName,
     status: "pending",
+    createdAt: serverTimestamp()
+  });
+
+  await addDoc(collection(db, "notifications", toUid, "items"), {
+    text: `${user.email.split("@")[0]} sent a friend request`,
+    seen: false,
     createdAt: serverTimestamp()
   });
 
   log("Friend request sent");
 };
-
-/* ================= FRIEND LIST ================= */
-function loadFriends() {
-  const box = document.getElementById("friendsBox");
-  if (!box) return;
-
-  onSnapshot(collection(db, "friends"), (snap) => {
-    let html = "";
-
-    snap.forEach(d => {
-      const f = d.data();
-
-      if (f.userA !== user.uid && f.userB !== user.uid) return;
-
-      const friendId = f.userA === user.uid ? f.userB : f.userA;
-
-      html += `
-        <div class="card">
-          👤 ${friendId}
-          <button onclick="openUser('${friendId}','Friend')">DM</button>
-        </div>
-      `;
-    });
-
-    box.innerHTML = html;
-  });
-}
 
 /* ================= FRIEND REQUESTS ================= */
 function loadFriendRequests() {
@@ -208,7 +213,33 @@ function loadFriendRequests() {
 
       html += `
         <div class="card">
-          <b>${r.from}</b> sent request
+          <b>${r.fromName}</b> sent a request
+        </div>
+      `;
+    });
+
+    box.innerHTML = html;
+  });
+}
+
+/* ================= FRIEND LIST ================= */
+function loadFriends() {
+  const box = document.getElementById("friendsBox");
+  if (!box) return;
+
+  onSnapshot(collection(db, "friends"), (snap) => {
+    let html = "";
+
+    snap.forEach(d => {
+      const f = d.data();
+
+      if (f.userA !== user.uid && f.userB !== user.uid) return;
+
+      const friendId = f.userA === user.uid ? f.userB : f.userA;
+
+      html += `
+        <div class="card">
+          👤 ${friendId}
         </div>
       `;
     });
