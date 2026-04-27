@@ -12,34 +12,32 @@ import {
   query,
   orderBy,
   getDocs,
-  writeBatch
+  writeBatch,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================= MONITOR ================= */
+/* ================= MONITOR CORE ================= */
 function log(msg) {
   const box = document.getElementById("monitor");
   if (!box) return;
 
   const time = new Date().toLocaleTimeString();
-
   const line = document.createElement("div");
-  line.textContent = `[${time}] ${msg}`;
 
+  line.textContent = `[${time}] ${msg}`;
   box.appendChild(line);
   box.scrollTop = box.scrollHeight;
 }
 
-/* ================= STATE ================= */
-window.selectedUser = null;
-window.replyTarget = null;
-
 /* ================= BOOT ================= */
 window.addEventListener("DOMContentLoaded", () => {
   const box = document.getElementById("monitor");
-  if (box) box.innerHTML = "🟢 Admin booting...";
+
+  if (box) box.innerHTML = "🟢 Admin Monitor Initializing...";
 
   setTimeout(() => {
     log("System ready");
+    log("Monitor online");
   }, 500);
 });
 
@@ -56,7 +54,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  log("Admin logged in");
+  log("Admin verified");
   startSystem();
 });
 
@@ -65,102 +63,41 @@ function startSystem() {
   loadUsers();
   loadPosts();
   loadAdRequests();
-  loadChatMonitor();
+  loadEventMonitor(); // 🔥 NEW UNIFIED MONITOR
 }
 
-/* ================= CHAT MONITOR (UPGRADED) ================= */
-function loadChatMonitor() {
+/* ================= UNIFIED MONITOR (CHAT + LOGS) ================= */
+function loadEventMonitor() {
   const box = document.getElementById("monitor");
   if (!box) return;
 
-  onSnapshot(collection(db, "chats"), (snap) => {
-    snap.docChanges().forEach(change => {
-      if (change.type === "added") {
-        const m = change.doc.data();
+  onSnapshot(query(collection(db, "events"), orderBy("createdAt", "asc")), (snap) => {
+    box.innerHTML = "";
 
-        const line = document.createElement("div");
-        line.style.padding = "6px";
-        line.style.borderBottom = "1px solid #222";
-        line.style.cursor = "pointer";
+    snap.forEach(docSnap => {
+      const e = docSnap.data();
 
-        line.innerHTML = `
-          💬 
-          <b style="color:#5bc0be;cursor:pointer"
-             onclick="openUser('${m.uid}','${m.username}')">
-            ${m.username}
-          </b>: ${m.text}
-          
-          <span style="float:right;color:orange;cursor:pointer"
-                onclick="replyTo('${change.doc.id}','${m.username}')">
-            ↩
-          </span>
+      if (e.type === "chat") {
+        box.innerHTML += `
+          <div style="padding:6px;border-bottom:1px solid #222;">
+            💬 <b onclick="openUser('${e.uid}')">${e.username}</b>: ${e.text}
+            <button onclick="replyToUser('${e.uid}')">↩</button>
+          </div>
         `;
+      }
 
-        box.appendChild(line);
-        box.scrollTop = box.scrollHeight;
+      if (e.type === "log") {
+        box.innerHTML += `
+          <div style="color:#00ff66;">
+            [LOG] ${e.text}
+          </div>
+        `;
       }
     });
+
+    box.scrollTop = box.scrollHeight;
   });
 }
-
-/* ================= USER POPUP ================= */
-window.openUser = (uid, name) => {
-  window.selectedUser = { uid, name };
-
-  let popup = document.getElementById("userPopup");
-
-  if (!popup) {
-    popup = document.createElement("div");
-    popup.id = "userPopup";
-    popup.style = `
-      position:fixed;
-      top:20%;
-      left:50%;
-      transform:translateX(-50%);
-      background:#1c2541;
-      padding:15px;
-      border-radius:10px;
-      width:280px;
-      z-index:99999;
-      color:white;
-    `;
-
-    popup.innerHTML = `
-      <h3 id="popupName"></h3>
-      <button onclick="startDM()">💬 DM User</button>
-      <button onclick="addFriend()">➕ Add Friend</button>
-      <button onclick="closePopup()">❌ Close</button>
-    `;
-
-    document.body.appendChild(popup);
-  }
-
-  document.getElementById("popupName").innerText = name;
-  popup.style.display = "block";
-};
-
-window.closePopup = () => {
-  const popup = document.getElementById("userPopup");
-  if (popup) popup.style.display = "none";
-};
-
-window.startDM = () => {
-  if (!window.selectedUser) return;
-
-  localStorage.setItem("dmTarget", JSON.stringify(window.selectedUser));
-
-  location.href = "messages.html";
-};
-
-window.addFriend = () => {
-  alert("Friend system coming next phase");
-};
-
-/* ================= REPLY SYSTEM ================= */
-window.replyTo = (msgId, username) => {
-  window.replyTarget = { msgId, username };
-  log("Replying to: " + username);
-};
 
 /* ================= BROADCAST ================= */
 window.sendBroadcast = async () => {
@@ -175,7 +112,7 @@ window.sendBroadcast = async () => {
   await addDoc(collection(db, "broadcasts"), {
     title: title.value,
     message: message.value,
-    createdAt: Date.now(),
+    createdAt: serverTimestamp(),
     active: true
   });
 
@@ -192,15 +129,8 @@ function loadUsers() {
 
   onSnapshot(collection(db, "onlineUsers"), (snap) => {
     box.innerHTML = "";
-
     snap.forEach(d => {
-      const u = d.data();
-
-      box.innerHTML += `
-        <div class="item" onclick="openUser('${d.id}','${u.email}')">
-          ${u.email}
-        </div>
-      `;
+      box.innerHTML += `<div class="item">${d.data().email}</div>`;
     });
   });
 }
@@ -256,3 +186,12 @@ function loadAdRequests() {
     });
   });
 }
+
+/* ================= QUICK ACTIONS ================= */
+window.openUser = (uid) => {
+  alert("Open user profile: " + uid);
+};
+
+window.replyToUser = (uid) => {
+  alert("Reply to user: " + uid);
+};
